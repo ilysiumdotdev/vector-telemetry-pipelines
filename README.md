@@ -1,54 +1,61 @@
 # vector-deployment
 
-Vector agent & aggregator configurations for platform observability pipelines.
+Canonical Vector agent and aggregator pipelines to collect, normalize, and ship cross-domain telemetry to SIEM and archival stores.
 
 ![image](./docs/vector-open-graph.png)
 
-## Vector Overview
+## Table of Contents
 
-**Vector** is a lightweight tool by for building high performance observability pipelines for logs and metrics. Built by DataDog, it has many advanced features that make it a top tier choice for log aggregation:
+- [Planned Features](#planned-features)
+- [Overview](#overview)
+- [Solution Architecture](#solution-architecture)
+  - [Agent](#agent)
+  - [Aggregator](#aggregator)
+  - [Telemetry Stream & Routing](#telemetry-stream--routing)
+    - [Sources](#sources)
+    - [Transforms](#transforms)
+    - [Sinks](#sinks)
+- [Repository Structure](#repository-structure)
+- [Tests](#tests)
 
-- **Performance** — Vector is written in Rust, which gives it the speed and memory efficiency to handle high-volume event streams.
+## Planned Features
 
-- **Programmable Transforms** — **Vector Remap Language (VRL**) can be used to handle complex customizations of events, such as renaming fields, perfoming calculations, and conditional routing.
+Work in progress and upcoming changes for this repository:
 
-- **Vendor Neutral** — Observability data can be shipped to over 60 destinations, including Elasticsearch, S3, CloudWatch, and Kafka.
+- [ ] Update all remap transforms to normalize fields to **[ECS](https://www.elastic.co/docs/reference/ecs) (Elastic Common Schema)** to support easier correlation of events across domains
+- [ ] Add **Kafka** sources/sink to the core log streams to support fan-out patterns and advanced analysis of security telemetry
 
+## Overview
 
-## Deployment Architecture
+This repository serves as the canonical deployment manifest for Vector agent/aggregator configurations for collecting, normalizing, transforming, and shipping telemetry data to a various destinations, including SIEM and archival storage.
 
-This configuration has Vector deployed both as an **agent** and and **aggregator**.
+While the primary value of this solution comes from its ability to collect and aggregate security-relevant telemetry across domains, such as cloud environments, on-premise platforms (Kubernetes), identity providers, and network devices, it also serves as a collector for operational telemetry data for troubleshooting, such as standard metrics and traces.
 
-### Roles
+## Solution Architecture
 
-#### Agent
+This configuration has Vector deployed with both **agents** and **aggregators**:
 
-Agent configurations are located in `/config/agent`. The Vector agent is used to collect events from file-based locations, such as the host filesystem and Kubernetes pod logs. 
+### Agent
 
-This is the more reliable approach to collect data from these types of sources because Vector is deployed as a **DaemonSet** on Kubernetes, which means that Kubernetes ensures an instance exists on every node in the cluster.
+Agent configurations are located in `/config/agent`. This configuration has Vector act in a more traditional log collection agent context, where it is used to read logs from file and stdout locations on the host. Because the Vector agent is a **DaemonSet** on Kubernetes, we can ensure an agent instance exists on every node in the cluster at all times.
 
-The Vector agent is configured to stream collected observability data to the Vector aggregator, which handles upstream processing before forwarding events to their destinations.
-
-#### Aggregator
+### Aggregator
 
 Aggregator configurations are located in `/config/aggregator`. The aggregator is used to collect event from network-based locations, such as sockets for syslogs from physical network devices.
 
-As mentioned, the aggregator handles the more complex processing in the pipeline, such as remapping fields, filtering events, and routing to destinations.
+Aggregators handle the more complex processing in the pipeline, such as remapping fields, filtering events, and routing to destinations.
 
-The Vector aggregator is deployed as a `Deployment` on Kubernetes, meaning it can be autoscaled if necessary to handle the volume of incoming events.
+The Vector aggregator is deployed as a `Deployment` on Kubernetes, meaning the number of instances can be scaled automatically with the volume of incoming events.
 
-***
-
-![image](./docs/vector-flow-diagram.png)
-
-### Event Stream
+### Telemetry Stream & Routing
 
 #### Sources
 
-- Hubble Network Flow Logs
-- Kubernetes Application Logs
-- Kubernetes Audit Logs
-- Vault Audit Logs
+| Name                  | Type | Description                                                                                                      | Value                                                                                                       |
+| --------------------- | ---- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Hubble Logs           | Logs | Provides insights into all network traffic & network policy evaluations inside Kubernetes                        | Troubleshooting applicaion connectivity, identifying lateral movement between pods                          |
+| Kubernetes Logs       | Logs | Application logs for every pod running on Kubernetes, collected via stdout                                       | Operational application logs, correlating security telemetry with application-level events                  |
+| Kubernetes Audit Logs | Logs | Audit logs from the Kubernetes API server for resource operations (e.g., create/update/delete) and privilege use | Audit sensitive cluster operations (create deployment/cronjob) and command execution (e.g., `kubectl exec`) |
 
 #### Transforms
 
@@ -59,21 +66,45 @@ The Vector aggregator is deployed as a `Deployment` on Kubernetes, meaning it ca
 
 #### Sinks
 
-- **Elastic** — Main SIEM and store for platform logs and metrics
-- **S3** — Longer term archival storage for logs (Standard S3 with lifecyle rules for S3 Glacier)
-- **Kafka** — Supports experimental but highly targeted event-driven security automations
+- **Elastic** — SIEM and store for security/operational logs and metrics
+- **S3** — Archival storage for logs with lifecycle rules for cost-effective long-term storage on S3 Glacier
+- **Kafka** — Supports fan-out patterns to deliver events to multiple downstream consumers independently
 
+## Repository Structure
 
-## Security
+```
+vector-deployment/
+├── config/
+│   ├── agent/          # Agent configurations
+│   └── aggregator/     # Aggregator configurations
+├── kubernetes/
+│   ├── base/           # Flux HelmRelease manifests, Kustomize config maps, TLS, and secrets
+│   └── production/     # Production overlay (references base)
+├── tests/
+│   ├── agent/          # Unit tests for agent transforms
+│   └── aggregator/     # Unit tests for aggregator transforms
+├── docs/               # Documentation assets
+└── .github/workflows/  # CI validation and test runs on pull request
+```
 
-The connection from the Vector agents to Vector aggregators is secured with mTLS. This is done to prevent the risk of an adversary pushing rogue or spoofed events to an aggregator to disrupt the observability pipeline.
+| Path                 | Description                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| `config/agent/`      | Vector agent configurations — handles initial host-based log collection and handoff                   |
+| `config/aggregator/` | Vector aggregator configuration — parses, routes, remaps, and ships events to upstream destinations   |
+| `kubernetes/`        | Kubernetes deployment manifests (Flux + Kustomize) that mount `config/` into running Vector instances |
+| `tests/`             | Vector unit test definitions paired with their respective `config/` directory                         |
 
 ## Tests
 
-Vector configurations are tested with unit tests on a pull request. This ensures that configurations & transforms work as expected before they're deployed to the pipeline.
+Unit tests are used to test Vector transforms with mock events to ensure they produce the desired event schema (e.g., fields are named properly, computed values are correct, etc.)
 
-Tests for each type of Vector deployment can be found in their respective directory in `/tests` (`/tests/agent` & `/tests/aggregator`).
+Tests live in `tests/agent/` and `tests/aggregator/`, mirroring the layout of `config/agent/` and `config/aggregator/`. Each test file targets a single transform and is run alongside its corresponding config directory.
 
+To run the tests locally, use the following commands:
 
-
-
+```bash
+vector validate --config-dir config/agent/ --no-environment
+vector validate --config-dir config/aggregator/ --no-environment
+vector test --config-dir config/agent --config-dir tests/agent
+vector test --config-dir config/aggregator --config-dir tests/aggregator
+```
