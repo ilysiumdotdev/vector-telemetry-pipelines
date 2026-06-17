@@ -1,4 +1,4 @@
-# vector-deployment
+# Vector Telemetry Pipelines
 
 Canonical Vector agent and aggregator pipelines to collect, normalize, and ship cross-domain telemetry to SIEM and archival stores.
 
