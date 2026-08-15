@@ -1,0 +1,116 @@
+#                                    __   __  __
+#                                    \ \ / / / /
+#                                     \ V / / /
+#                                      \_/  \/
+#
+#                                    V E C T O R
+#                                  Helm Chart Values
+# ------------------------------------------------------------------
+# Reference: https://github.com/vectordotdev/helm-charts/
+# ------------------------------------------------------------------
+
+# Each role is created with the following workloads:
+# Agent = DaemonSet
+# Aggregator = StatefulSet
+# Stateless-Aggregator = Deployment
+role: "Agent"
+
+# rollWorkload -- Add a checksum of the generated ConfigMap to workload annotations.
+rollWorkload: true
+
+rbac:
+  create: false
+
+serviceAccount:
+  # serviceAccount.create -- If true, create a ServiceAccount for Vector.
+  create: true
+  # serviceAccount.annotations -- Annotations to add to Vector's ServiceAccount.
+  annotations: {}
+  # serviceAccount.name -- The name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name
+  # is generated using the fullname template.
+  name: vector-agent
+  # serviceAccount.automountToken -- Automount API credentials for Vector's ServiceAccount.
+  automountToken: true
+
+# podAnnotations -- Set annotations on Vector Pods.
+podAnnotations: {}
+
+# podLabels -- Set labels on Vector Pods.
+podLabels:
+  vector.dev/exclude: "true"
+
+# env -- Set environment variables for Vector containers.
+env:
+  - name: KUBERNETES_CLUSTER_TYPE
+    value: ${CLUSTER_TYPE}
+  - name: KUBERNETES_CLUSTER_NAME
+    value: ${CLUSTER_NAME}
+
+# resources -- Set Vector resource requests and limits.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+
+# Configuration for Vector's Service.
+service:
+  enabled: false
+
+# existingConfigMaps -- List of existing ConfigMaps for Vector's configuration instead of creating a new one. Requires
+# dataDir to be set. Additionally, containerPorts, service.ports, and serviceHeadless.ports should be specified based on
+# your supplied configuration. If set, this parameter takes precedence over customConfig and the chart's default configs.
+existingConfigMaps:
+  - vector-base
+
+# dataDir -- Specify the path for Vector's data, only used when existingConfigMaps are used.
+dataDir: /vector-data-dir
+
+# extraVolumes -- Additional Volumes to use with Vector Pods.
+extraVolumes:
+  - name: vector-agent-sources
+    configMap:
+      name: vector-agent-sources
+  - name: vector-agent-transforms
+    configMap:
+      name: vector-agent-transforms
+  - name: vector-agent-sinks
+    configMap:
+      name: vector-agent-sinks
+  - name: ilysium-root-ca
+    configMap:
+      name: ilysium-root-ca
+  - name: vector-agent-tls
+    secret:
+      secretName: vector-agent-tls-secret
+  - name: hubble-logs
+    hostPath:
+      path: /var/run/cilium/hubble
+      type: DirectoryOrCreate
+
+# extraVolumeMounts -- Additional Volume to mount into Vector Containers.
+extraVolumeMounts:
+  - name: vector-agent-sources
+    mountPath: /etc/vector/sources
+    readOnly: true
+  - name: vector-agent-transforms
+    mountPath: /etc/vector/transforms
+    readOnly: true
+  - name: vector-agent-sinks
+    mountPath: /etc/vector/sinks
+    readOnly: true
+  - name: ilysium-root-ca
+    mountPath: /etc/ssl/ilysium
+    readOnly: true
+  - name: vector-agent-tls
+    mountPath: /etc/ssl/vector
+    readOnly: true
+  - name: hubble-logs
+    mountPath: /var/run/cilium/hubble
+    readOnly: true
+
+# workloadResourceAnnotations -- Set annotations on the Vector DaemonSet, Deployment or StatefulSet.
+workloadResourceAnnotations:
+  reloader.stakater.com/auto: "true"

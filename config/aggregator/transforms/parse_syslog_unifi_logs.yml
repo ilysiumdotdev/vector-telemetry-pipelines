@@ -1,0 +1,19 @@
+type: remap
+inputs:
+  - route_by_source.unifi_logs
+source: |
+  original_timestamp = .timestamp
+
+  parsed, err = parse_syslog(.message)
+  if err == null {
+      . = parsed
+  } else {
+    .@vector.parse_error = err
+    if !exists(.timestamp) || !is_timestamp(.timestamp) {
+      .timestamp = original_timestamp
+    }
+  }
+
+  if .appname == "CEF" {
+    .message, err = .appname + ":" + .message
+  }

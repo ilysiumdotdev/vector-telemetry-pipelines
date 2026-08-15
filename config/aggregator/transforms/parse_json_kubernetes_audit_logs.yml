@@ -1,0 +1,16 @@
+type: remap
+inputs:
+  - route_by_source.kubernetes_audit_logs
+source: |
+  original_timestamp = .timestamp
+
+  parsed, err = parse_json(.message)
+  if err == null {
+    . = parsed
+  } else {
+    .@vector.parse_error = err
+  }
+
+  if !exists(.timestamp) {
+    .timestamp = original_timestamp
+  }

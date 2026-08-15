@@ -1,0 +1,78 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vector-agent
+  namespace: vector
+spec:
+  serviceAccountName: flux
+  targetNamespace: vector
+  interval: 30m
+  chart:
+    spec:
+      chart: vector
+      version: "0.51.x"
+      sourceRef:
+        kind: HelmRepository
+        name: vector
+      interval: 12h
+  releaseName: vector-agent
+  
+  values:
+    role: "Agent"
+    dataDir: /vector-data-dir
+    existingConfigMaps:
+      - vector-base
+
+    service:
+      enabled: false
+
+    serviceAccount:
+      create: true
+      name: vector-agent
+
+    rbac:
+      create: false
+
+    extraVolumes:
+      - name: vector-agent-sources
+        configMap:
+          name: vector-agent-sources
+      - name: vector-agent-transforms
+        configMap:
+          name: vector-agent-transforms
+      - name: vector-agent-sinks
+        configMap:
+          name: vector-agent-sinks
+      - name: ilysium-root-ca
+        configMap:
+          name: ilysium-root-ca
+      - name: vector-agent-tls
+        secret:
+          secretName: vector-agent-tls-secret
+      - name: hubble-logs
+        hostPath:
+          path: /var/run/cilium/hubble
+          type: DirectoryOrCreate
+
+    extraVolumeMounts:
+      - name: vector-agent-sources
+        mountPath: /etc/vector/sources
+        readOnly: true
+      - name: vector-agent-transforms
+        mountPath: /etc/vector/transforms
+        readOnly: true
+      - name: vector-agent-sinks
+        mountPath: /etc/vector/sinks
+        readOnly: true
+      - name: ilysium-root-ca
+        mountPath: /etc/ssl/ilysium
+        readOnly: true
+      - name: vector-agent-tls
+        mountPath: /etc/ssl/vector
+        readOnly: true
+      - name: hubble-logs
+        mountPath: /var/run/cilium/hubble
+        readOnly: true
+
+    workloadResourceAnnotations:
+      reloader.stakater.com/auto: "true"

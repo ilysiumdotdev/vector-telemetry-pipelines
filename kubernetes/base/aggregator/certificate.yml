@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vector-aggregator-tls
+  namespace: vector
+spec:
+  issuerRef:
+    name: vault-kubernetes-issuer
+    kind: ClusterIssuer
+  secretName: vector-aggregator-tls-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  commonName: vector-aggregator.vector.svc
+  dnsNames:
+    - vector-aggregator.vector.svc
+  usages:
+    - server auth
+    - client auth

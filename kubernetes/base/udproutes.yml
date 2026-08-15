@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: UDPRoute
+metadata:
+  name: syslog-route
+  namespace: vector
+spec:
+  parentRefs:
+    - name: internal-cluster-gateway
+      namespace: envoy-gateway-system
+      sectionName: syslog
+  rules:
+    - backendRefs:
+        - name: vector-aggregator
+          port: 514

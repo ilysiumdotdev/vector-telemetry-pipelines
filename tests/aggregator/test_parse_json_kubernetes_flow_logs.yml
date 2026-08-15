@@ -1,0 +1,78 @@
+tests:
+  - name: test_parse_json_kubernetes_flow_logs_replaces_root_with_parsed_message
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: '{"flow":{"verdict":"FORWARDED"}}'
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.flow.verdict, "FORWARDED")
+
+  - name: test_parse_json_kubernetes_flow_logs_discards_original_message_field
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: '{"flow":{"verdict":"FORWARDED"}}'
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.message))
+
+  - name: test_parse_json_kubernetes_flow_logs_preserves_timestamp_when_parsed_json_omits_it
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: '{"flow":{"verdict":"FORWARDED"}}'
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(is_timestamp(.timestamp))
+
+  - name: test_parse_json_kubernetes_flow_logs_prefers_parsed_timestamp_when_present
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: '{"flow":{"verdict":"FORWARDED"},"timestamp":"2026-01-01T00:00:00Z"}'
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.timestamp, "2026-01-01T00:00:00Z")
+
+  - name: test_parse_json_kubernetes_flow_logs_flags_parse_error_on_invalid_json
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: "not valid json at all {{{"
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(exists(.@vector.parse_error))
+
+  - name: test_parse_json_kubernetes_flow_logs_preserves_timestamp_on_parse_failure
+    inputs:
+      - insert_at: parse_json_kubernetes_flow_logs
+        type: log
+        log_fields:
+          message: "not valid json at all {{{"
+    outputs:
+      - extract_from: parse_json_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(is_timestamp(.timestamp))

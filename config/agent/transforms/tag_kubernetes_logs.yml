@@ -1,7 +1,0 @@
-type: remap
-inputs:
-  - kubernetes_logs
-source: |
-  .@source = "kubernetes"
-  .@dataset = "kubernetes." + string!(.kubernetes.pod_namespace)
-  .@namespace = "default"
