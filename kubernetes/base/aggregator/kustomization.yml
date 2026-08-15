@@ -5,7 +5,9 @@ resources:
   - helmrelease.yml
 
 configMapGenerator:
-  - values.yml
+  - name: vector-aggregator-values
+    files:
+      - values.yml
 
 generatorOptions:
   disableNameSuffixHash: true
