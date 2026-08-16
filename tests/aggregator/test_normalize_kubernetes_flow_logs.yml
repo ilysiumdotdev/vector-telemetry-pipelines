@@ -137,7 +137,7 @@ tests:
               assert_eq!(.source.labels."common.k8s.elastic.co/type", "elasticsearch")
               assert_eq!(.source.labels."elasticsearch.k8s.elastic.co/cluster-name", "elasticsearch")
 
-  - name: test_normalize_kubernetes_flow_logs_destination_labels_independent_of_source
+  - name: test_normalize_kubernetes_flow_logs_parses_destination_labels_to_object
     inputs:
       - insert_at: normalize_kubernetes_flow_logs
         type: log
@@ -157,20 +157,6 @@ tests:
               assert_eq!(.source.labels.role, "source-only")
               assert_eq!(.destination.labels.role, "destination-only")
 
-  - name: test_normalize_kubernetes_flow_logs_omits_source_namespace_when_absent
-    inputs:
-      - insert_at: normalize_kubernetes_flow_logs
-        type: log
-        log_fields:
-          flow:
-            source: {}
-    outputs:
-      - extract_from: normalize_kubernetes_flow_logs
-        conditions:
-          - type: vrl
-            source: |
-              assert!(!exists(.source.namespace))
-
   - name: test_normalize_kubernetes_flow_logs_includes_source_namespace_when_present
     inputs:
       - insert_at: normalize_kubernetes_flow_logs
@@ -185,6 +171,20 @@ tests:
           - type: vrl
             source: |
               assert_eq!(.source.namespace, "elastic-stack")
+
+  - name: test_normalize_kubernetes_flow_logs_omits_source_namespace_when_absent
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            source: {}
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.source.namespace))
 
   - name: test_normalize_kubernetes_flow_logs_maps_cilium_trace_fields
     inputs:

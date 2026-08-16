@@ -7,11 +7,10 @@ source: |
   parsed, err = parse_syslog(.message)
   if err == null {
       . = parsed
-  } else {
-    .@vector.parse_error = err
-    if !exists(.timestamp) || !is_timestamp(.timestamp) {
-      .timestamp = original_timestamp
-    }
+  }
+
+  if !exists(.timestamp) {
+    .timestamp = original_timestamp
   }
 
   if .appname == "CEF" {

@@ -1,0 +1,93 @@
+tests:
+  - name: test_parse_cef_unifi_logs_extracts_cef_header_fields
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "CEF:0|Ubiquiti|UniFi Network|10.5.67|200|Threat Detected|7|UNIFIcategory=Security src=1.1.1.1 dst=2.2.2.2"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.cefVersion, "0")
+              assert_eq!(.deviceVendor, "Ubiquiti")
+              assert_eq!(.deviceProduct, "UniFi Network")
+              assert_eq!(.deviceVersion, "10.5.67")
+              assert_eq!(.deviceEventClassId, "200")
+              assert_eq!(.name, "Threat Detected")
+              assert_eq!(.severity, "7")
+
+  - name: test_parse_cef_unifi_logs_extracts_standard_extension_fields
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "CEF:0|Ubiquiti|UniFi Network|10.5.67|200|Threat Detected|7|src=66.132.186.249 dst=10.20.60.2 proto=TCP spt=43807 dpt=25565"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.src, "66.132.186.249")
+              assert_eq!(.dst, "10.20.60.2")
+              assert_eq!(.proto, "TCP")
+              assert_eq!(.spt, "43807")
+              assert_eq!(.dpt, "25565")
+
+  - name: test_parse_cef_unifi_logs_extracts_unifi_vendor_extension_fields
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "CEF:0|Ubiquiti|UniFi Network|10.5.67|200|Threat Detected|7|UNIFIcategory=Security UNIFIrisk=medium UNIFIpolicyName=DShield Block List"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.UNIFIcategory, "Security")
+              assert_eq!(.UNIFIrisk, "medium")
+
+  - name: test_parse_cef_unifi_logs_removes_raw_message_on_success
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "CEF:0|Ubiquiti|UniFi Network|10.5.67|200|Threat Detected|7|src=1.1.1.1"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.message))
+
+  - name: test_parse_cef_unifi_logs_preserves_syslog_envelope_fields
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "CEF:0|Ubiquiti|UniFi Network|10.5.67|200|Threat Detected|7|src=1.1.1.1"
+          hostname: "UDM-Pro"
+          facility: "local0"
+          severity_syslog: "info"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.hostname, "UDM-Pro")
+              assert_eq!(.facility, "local0")
+
+  - name: test_parse_cef_unifi_logs_leaves_message_intact_on_parse_failure
+    inputs:
+      - insert_at: parse_cef_unifi_logs
+        type: log
+        log_fields:
+          message: "not a CEF formatted message at all"
+    outputs:
+      - extract_from: parse_cef_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.message, "not a CEF formatted message at all")

@@ -17,7 +17,7 @@ tests:
               assert_eq!(.foo, "test")
               assert_eq!(.bar, "hello world")
 
-  - name: test_parse_json_kubernetes_audit_logs_sets_error_on_invalid_json
+  - name: test_parse_json_kubernetes_audit_logs_keeps_message_on_invalid_json
     inputs:
       - insert_at: parse_json_kubernetes_audit_logs
         type: log
@@ -28,7 +28,7 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert!(exists(.@vector.parse_error) || exists(.message))
+              assert!(exists(.message))
 
   - name: test_parse_json_kubernetes_audit_logs_prefers_parsed_timestamp_when_present
     inputs:

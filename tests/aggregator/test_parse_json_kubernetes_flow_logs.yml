@@ -51,7 +51,7 @@ tests:
             source: |
               assert_eq!(.timestamp, "2026-01-01T00:00:00Z")
 
-  - name: test_parse_json_kubernetes_flow_logs_flags_parse_error_on_invalid_json
+  - name: test_parse_json_kubernetes_flow_logs_keeps_message_on_invalid_json
     inputs:
       - insert_at: parse_json_kubernetes_flow_logs
         type: log
@@ -62,7 +62,7 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert!(exists(.@vector.parse_error))
+              assert!(exists(.message))
 
   - name: test_parse_json_kubernetes_flow_logs_preserves_timestamp_on_parse_failure
     inputs:

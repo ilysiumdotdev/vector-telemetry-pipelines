@@ -52,7 +52,7 @@ tests:
             source: |
               assert_eq!(.message, "CEF:0|TestVendor|TestProduct|1.0|100|Test Event|5|TESTfield=value1 src=1.1.1.1 msg=this is a test message")
 
-  - name: test_parse_syslog_unifi_logs_handles_malformed_envelope
+  - name: test_parse_syslog_unifi_logs_keeps_message_on_invalid_syslog
     inputs:
       - insert_at: parse_syslog_unifi_logs
         type: log
@@ -63,7 +63,7 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert!(exists(.syslog_parse_error) || exists(.message))
+              assert!(exists(.message))
 
   - name: test_parse_syslog_unifi_logs_prefers_parsed_timestamp_when_present
     inputs:
@@ -89,5 +89,4 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert!(exists(.@vector.parse_error))
               assert!(is_timestamp(.timestamp))

@@ -4,6 +4,7 @@ inputs:
   - route_elastic_data_stream_kubernetes_audit_logs
   - route_elastic_data_stream_kubernetes_container_logs
   # - route_elastic_data_stream_kubernetes_flow_logs
+  - route_elastic_data_stream_unifi_logs
 endpoints:
   - https://elasticsearch-es-http.elastic-stack.svc:9200
 tls:

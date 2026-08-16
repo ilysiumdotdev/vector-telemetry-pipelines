@@ -7,8 +7,6 @@ source: |
   parsed, err = parse_json(.message)
   if err == null {
     . = parsed
-  } else {
-    .@vector.parse_error = err
   }
 
   if !exists(.timestamp) {

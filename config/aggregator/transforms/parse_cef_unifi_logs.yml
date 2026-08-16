@@ -1,0 +1,9 @@
+type: remap
+inputs:
+  - parse_syslog_unifi_logs
+source: |
+  parsed, err = parse_cef(.message)
+  if err == null {
+    . = merge(., parsed)
+    del(.message)
+  }
