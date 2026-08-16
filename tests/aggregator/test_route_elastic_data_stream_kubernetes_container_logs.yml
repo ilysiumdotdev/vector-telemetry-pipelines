@@ -13,4 +13,4 @@ tests:
             source: |
               assert_eq!(.data_stream.type, "logs")
               assert_eq!(.data_stream.dataset, "kubernetes.container")
-              assert_eq!(.data_stream.namespace, "test-system")
+              assert_eq!(.data_stream.namespace, "default")
