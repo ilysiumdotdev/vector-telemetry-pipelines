@@ -8,14 +8,18 @@ on:
 
 jobs:
   test:
-    name: Test ${{ matrix.component }} Configuration
+    name: Test ${{ matrix.target.name }} Configuration
     runs-on: ubuntu-latest
     container:
       image: timberio/vector:nightly-alpine
     strategy:
       fail-fast: false
       matrix:
-        component: [agent, aggregator]
+        target:
+          - id: agent
+            name: Agent
+          - id: aggregator
+            name: Aggregator
 
     steps:
       - name: Checkout Code
@@ -23,16 +27,12 @@ jobs:
 
       - name: Validate Configuration
         run: |
-          vector validate
-            --config-dir config/${{ matrix.component }}/ \
+          vector validate \
+            --config-dir config/${{ matrix.target.id}}/ \
             --no-environment
 
       - name: Run Unit Tests
         run: |
           vector test \
-            --config-dir config/${{ matrix.component }} \
-            --config-dir tests/${{ matrix.component }}
-
-          vector test \
-            --config-dir config/${{ matrix.component }} \
-            --config-dir tests/${{ matrix.component }}
+            --config-dir config/${{ matrix.target.id }} \
+            --config-dir tests/${{ matrix.target.id }}
