@@ -1,13 +1,6 @@
-#                                    __   __  __
-#                                    \ \ / / / /
-#                                     \ V / / /
-#                                      \_/  \/
-#
-#                                    V E C T O R
-#                                  Helm Chart Values
-# ------------------------------------------------------------------
-# Reference: https://github.com/vectordotdev/helm-charts/
-# ------------------------------------------------------------------
+# Vector Helm Values
+# See Vector helm repository for more:
+# https://github.com/vectordotdev/helm-charts/
 
 # Each role is created with the following workloads:
 # Agent = DaemonSet
@@ -16,7 +9,7 @@
 role: "Stateless-Aggregator"
 
 # rollWorkload -- Add a checksum of the generated ConfigMap to workload annotations.
-rollWorkload: true
+rollWorkload: false
 
 # replicas -- Specify the number of Pods to create. Valid for the "Aggregator" and "Stateless-Aggregator" roles.
 replicas: 1
@@ -46,6 +39,12 @@ podAnnotations: {}
 # podLabels -- Set labels on Vector Pods.
 podLabels:
   vector.dev/exclude: "true"
+
+# args -- Override Vector's default arguments.
+args:
+  - --config-dir
+  - --watch-config
+  - "/etc/vector/"
 
 # env -- Set environment variables for Vector containers.
 env:
@@ -140,7 +139,3 @@ extraVolumeMounts:
   - name: vector-aggregator-tls
     mountPath: /etc/ssl/vector
     readOnly: true
-
-# workloadResourceAnnotations -- Set annotations on the Vector DaemonSet, Deployment or StatefulSet.
-workloadResourceAnnotations:
-  reloader.stakater.com/auto: "true"
