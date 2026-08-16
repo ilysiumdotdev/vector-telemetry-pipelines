@@ -157,7 +157,7 @@ source: |
     .cilium.summary = .flow.Summary
   }
 
-  .orchestrator.type = "${KUBERNETES_CLUSTER_TYPE}"
-  .orchestrator.cluster.name = "${KUBERNETES_CLUSTER_NAME}"
+  .orchestrator.type = "$${KUBERNETES_CLUSTER_TYPE}"
+  .orchestrator.cluster.name = "$${KUBERNETES_CLUSTER_NAME}"
 
   del(.flow)
