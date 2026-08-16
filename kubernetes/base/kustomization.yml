@@ -38,6 +38,7 @@ configMapGenerator:
     files:
       - ../../config/aggregator/transforms/normalize_kubernetes_audit_logs.yml
       - ../../config/aggregator/transforms/normalize_kubernetes_flow_logs.yml
+      - ../../config/aggregator/transforms/parse_cef_unifi_logs.yml
       - ../../config/aggregator/transforms/parse_json_kubernetes_audit_logs.yml
       - ../../config/aggregator/transforms/parse_json_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/parse_json_kubernetes_flow_logs.yml
@@ -46,6 +47,7 @@ configMapGenerator:
       - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_audit_logs.yml
       - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_flow_logs.yml
+      - ../../config/aggregator/transforms/route_elastic_data_stream_unifi_logs.yml
       - ../../config/aggregator/transforms/tag_source_unifi_logs.yml
 
   - name: vector-aggregator-sinks
