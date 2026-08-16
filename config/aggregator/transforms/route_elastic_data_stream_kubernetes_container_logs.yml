@@ -1,6 +1,6 @@
 type: remap
 inputs:
-  - normalize_kubernetes_flow_logs
+  - parse_json_kubernetes_container_logs
 source: |
   type = "logs"
   dataset = "kubernetes.container"
