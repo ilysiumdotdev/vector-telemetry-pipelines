@@ -100,19 +100,19 @@ dataDir: /vector-data-dir
 
 # extraVolumes -- Additional Volumes to use with Vector Pods.
 extraVolumes:
-  - name: vector-aggregator-sources
+  - name: sources
     configMap:
       name: vector-aggregator-sources
-  - name: vector-aggregator-transforms
+  - name: transforms
     configMap:
       name: vector-aggregator-transforms
-  - name: vector-aggregator-sinks
+  - name: sinks
     configMap:
       name: vector-aggregator-sinks
-  - name: vector-aggregator-tls
+  - name: tls
     secret:
       secretName: vector-aggregator-tls-secret
-  - name: ilysium-root-ca
+  - name: root-ca
     configMap:
       name: ilysium-root-ca
   - name: elastic-ca
@@ -121,21 +121,21 @@ extraVolumes:
 
 # extraVolumeMounts -- Additional Volume to mount into Vector Containers.
 extraVolumeMounts:
-  - name: vector-aggregator-sources
+  - name: sources
     mountPath: /etc/vector/sources
     readOnly: true
-  - name: vector-aggregator-transforms
+  - name: transforms
     mountPath: /etc/vector/transforms
     readOnly: true
-  - name: vector-aggregator-sinks
+  - name: sinks
     mountPath: /etc/vector/sinks
     readOnly: true
   - name: elastic-ca
     mountPath: /etc/ssl/elastic
     readOnly: true
-  - name: ilysium-root-ca
+  - name: root-ca
     mountPath: /etc/ssl/ilysium
     readOnly: true
-  - name: vector-aggregator-tls
+  - name: tls
     mountPath: /etc/ssl/vector
     readOnly: true

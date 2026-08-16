@@ -69,19 +69,19 @@ dataDir: /vector-data-dir
 
 # extraVolumes -- Additional Volumes to use with Vector Pods.
 extraVolumes:
-  - name: vector-agent-sources
+  - name: sources
     configMap:
       name: vector-agent-sources
-  - name: vector-agent-transforms
+  - name: transforms
     configMap:
       name: vector-agent-transforms
-  - name: vector-agent-sinks
+  - name: sinks
     configMap:
       name: vector-agent-sinks
-  - name: ilysium-root-ca
+  - name: root-ca
     configMap:
       name: ilysium-root-ca
-  - name: vector-agent-tls
+  - name: tls
     secret:
       secretName: vector-agent-tls-secret
   - name: hubble-logs
@@ -91,19 +91,19 @@ extraVolumes:
 
 # extraVolumeMounts -- Additional Volume to mount into Vector Containers.
 extraVolumeMounts:
-  - name: vector-agent-sources
+  - name: sources
     mountPath: /etc/vector/sources
     readOnly: true
-  - name: vector-agent-transforms
+  - name: transforms
     mountPath: /etc/vector/transforms
     readOnly: true
-  - name: vector-agent-sinks
+  - name: sinks
     mountPath: /etc/vector/sinks
     readOnly: true
-  - name: ilysium-root-ca
+  - name: root-ca
     mountPath: /etc/ssl/ilysium
     readOnly: true
-  - name: vector-agent-tls
+  - name: tls
     mountPath: /etc/ssl/vector
     readOnly: true
   - name: hubble-logs
