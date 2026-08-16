@@ -70,13 +70,13 @@ tests:
       - insert_at: parse_syslog_unifi_logs
         type: log
         log_fields:
-          message: "<134>Aug 7 15:13:01 test-device TEST payload content here"
+          message: "<134>Aug 7 15:00:00 test-device TEST payload content here"
     outputs:
       - extract_from: parse_syslog_unifi_logs
         conditions:
           - type: vrl
             source: |
-              assert_eq!(format_timestamp!(.timestamp, "%Y-%m-%dT%H:%M:%SZ"), "2026-08-07T19:13:01Z")
+              assert_eq!(format_timestamp!(.timestamp, "%Y-%m-%dT%H:%M:%SZ"), "2026-08-07T15:00:00Z")
 
   - name: test_parse_syslog_unifi_logs_falls_back_to_vector_timestamp_when_absent
     inputs:
