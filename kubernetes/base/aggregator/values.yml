@@ -42,8 +42,8 @@ podLabels:
 
 # args -- Override Vector's default arguments.
 args:
-  - --config-dir
   - --watch-config
+  - --config-dir
   - "/etc/vector/"
 
 # env -- Set environment variables for Vector containers.
