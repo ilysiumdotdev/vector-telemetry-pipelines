@@ -1,4 +1,4 @@
-name: Test Vector Configuration
+name: Vector Pipeline Tests
 
 on:
   pull_request:
@@ -7,30 +7,32 @@ on:
       - tests/**
 
 jobs:
-  test-config:
+  test:
+    name: Test ${{ matrix.component }} Configuration
     runs-on: ubuntu-latest
     container:
       image: timberio/vector:nightly-alpine
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [agent, aggregator]
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.0.0
 
-      - name: Validate Vector Configuration
+      - name: Validate Configuration
         run: |
-          vector validate \
-            --config-dir config/agent/ \
+          vector validate
+            --config-dir config/${{ matrix.component }}/ \
             --no-environment
 
-          vector validate \
-            --config-dir config/aggregator/ \
-            --no-environment
-
-      - name: Test Vector Configuration
+      - name: Run Unit Tests
         run: |
           vector test \
-            --config-dir config/agent \
-            --config-dir tests/agent
+            --config-dir config/${{ matrix.component }} \
+            --config-dir tests/${{ matrix.component }}
 
           vector test \
-            --config-dir config/aggregator \
-            --config-dir tests/aggregator
+            --config-dir config/${{ matrix.component }} \
+            --config-dir tests/${{ matrix.component }}
