@@ -1,0 +1,8 @@
+type: remap
+inputs:
+  - route_by_source.kubernetes_container_logs
+source: |
+  parsed, err = parse_json(.message)
+  if err == null {
+    .message = parsed
+  }

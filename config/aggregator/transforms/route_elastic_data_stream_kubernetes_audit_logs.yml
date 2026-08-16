@@ -1,0 +1,11 @@
+type: remap
+inputs:
+  - normalize_kubernetes_audit_logs
+source: |
+  type = "logs"
+  dataset = "kubernetes.audit"
+  namespace = "default"
+
+  .data_stream.type = type
+  .data_stream.dataset = dataset
+  .data_stream.namespace = namespace

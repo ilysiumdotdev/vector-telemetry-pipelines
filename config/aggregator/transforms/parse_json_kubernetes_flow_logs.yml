@@ -1,0 +1,14 @@
+type: remap
+inputs:
+  - route_by_source.kubernetes_flow_logs
+source: |
+  original_timestamp = .timestamp
+
+  parsed, err = parse_json(.message)
+  if err == null {
+    . = parsed
+  }
+
+  if !exists(.timestamp) {
+    .timestamp = original_timestamp
+  }

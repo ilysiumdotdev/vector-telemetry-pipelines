@@ -1,0 +1,62 @@
+tests:
+  - name: test_parse_json_kubernetes_audit_logs_parses_valid_json
+    inputs:
+      - insert_at: parse_json_kubernetes_audit_logs
+        type: log
+        log_fields:
+          message: |
+            { 
+              "foo": "test",
+              "bar": "hello world" 
+            }
+    outputs:
+      - extract_from: parse_json_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.foo, "test")
+              assert_eq!(.bar, "hello world")
+
+  - name: test_parse_json_kubernetes_audit_logs_keeps_message_on_invalid_json
+    inputs:
+      - insert_at: parse_json_kubernetes_audit_logs
+        type: log
+        log_fields:
+          message: "invalid json"
+    outputs:
+      - extract_from: parse_json_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(exists(.message))
+
+  - name: test_parse_json_kubernetes_audit_logs_prefers_parsed_timestamp_when_present
+    inputs:
+      - insert_at: parse_json_kubernetes_audit_logs
+        type: log
+        log_fields:
+          timestamp: "2026-08-08T14:30:00.000Z"
+          message: |
+            {
+              "timestamp": "2026-08-08T14:20:00.000Z" 
+            }
+    outputs:
+      - extract_from: parse_json_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.timestamp, "2026-08-08T14:20:00.000Z")
+
+  - name: test_parse_json_kubernetes_audit_logs_falls_back_to_vector_timestamp_when_absent
+    inputs:
+      - insert_at: parse_json_kubernetes_audit_logs
+        type: log
+        log_fields:
+          timestamp: "2026-08-08T14:30:00.000Z"
+          message: "{}"
+    outputs:
+      - extract_from: parse_json_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.timestamp, "2026-08-08T14:30:00.000Z")

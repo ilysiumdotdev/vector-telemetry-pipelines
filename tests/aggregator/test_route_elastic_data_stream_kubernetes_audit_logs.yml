@@ -1,0 +1,14 @@
+tests:
+  - name: test_route_elastic_data_stream_kubernetes_audit_logs_adds_data_stream_fields
+    inputs:
+      - insert_at: route_elastic_data_stream_kubernetes_audit_logs
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: route_elastic_data_stream_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "kubernetes.audit")
+              assert_eq!(.data_stream.namespace, "default")

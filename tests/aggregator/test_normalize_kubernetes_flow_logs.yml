@@ -1,0 +1,216 @@
+tests:
+  - name: test_normalize_kubernetes_flow_logs_maps_allowed_verdict_to_success_outcome
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "FORWARDED"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.event.outcome, "success")
+              assert_eq!(.event.type, ["connection", "allowed"])
+
+  - name: test_normalize_kubernetes_flow_logs_maps_dropped_verdict_to_failure_outcome
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "DROPPED"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.event.outcome, "failure")
+              assert_eq!(.event.type, ["connection", "denied"])
+
+  - name: test_normalize_kubernetes_flow_logs_handles_unknown_verdict
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "SOMETHING_UNEXPECTED"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.event.outcome))
+              assert_eq!(.event.type, ["connection"])
+
+  - name: test_normalize_kubernetes_flow_logs_identifies_tcp_transport
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "FORWARDED"
+            l4:
+              TCP:
+                source_port: 9300
+                destination_port: 44552
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.network.transport, "tcp")
+              assert_eq!(.source.port, 9300)
+              assert_eq!(.destination.port, 44552)
+
+  - name: test_normalize_kubernetes_flow_logs_identifies_udp_transport
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "FORWARDED"
+            l4:
+              UDP:
+                source_port: 53
+                destination_port: 51823
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.network.transport, "udp")
+              assert_eq!(.source.port, 53)
+              assert_eq!(.destination.port, 51823)
+
+  - name: test_normalize_kubernetes_flow_logs_handles_missing_transport_gracefully
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            verdict: "FORWARDED"
+            l4: {}
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.network.transport, "other")
+              assert!(!exists(.source.port))
+              assert!(!exists(.destination.port))
+
+  - name: test_normalize_kubernetes_flow_logs_maps_source_ip_and_mac
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            IP:
+              source: "10.254.1.90"
+            ethernet:
+              source: "ba:62:dd:3b:ec:43"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.source.ip, "10.254.1.90")
+              assert_eq!(.source.mac, "ba:62:dd:3b:ec:43")
+
+  - name: test_normalize_kubernetes_flow_logs_parses_source_labels_to_object
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            source:
+              labels:
+                - "k8s:common.k8s.elastic.co/type=elasticsearch"
+                - "k8s:elasticsearch.k8s.elastic.co/cluster-name=elasticsearch"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.source.labels."common.k8s.elastic.co/type", "elasticsearch")
+              assert_eq!(.source.labels."elasticsearch.k8s.elastic.co/cluster-name", "elasticsearch")
+
+  - name: test_normalize_kubernetes_flow_logs_parses_destination_labels_to_object
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            source:
+              labels:
+                - "k8s:role=source-only"
+            destination:
+              labels:
+                - "k8s:role=destination-only"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.source.labels.role, "source-only")
+              assert_eq!(.destination.labels.role, "destination-only")
+
+  - name: test_normalize_kubernetes_flow_logs_includes_source_namespace_when_present
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            source:
+              namespace: "elastic-stack"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.source.namespace, "elastic-stack")
+
+  - name: test_normalize_kubernetes_flow_logs_omits_source_namespace_when_absent
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            source: {}
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.source.namespace))
+
+  - name: test_normalize_kubernetes_flow_logs_maps_cilium_trace_fields
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow:
+            trace_observation_point: "TO_OVERLAY"
+            trace_reason: "REPLY"
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.cilium.trace.observation_point, "TO_OVERLAY")
+              assert_eq!(.cilium.trace.reason, "REPLY")
+
+  - name: test_normalize_kubernetes_flow_logs_drops_flow_field
+    inputs:
+      - insert_at: normalize_kubernetes_flow_logs
+        type: log
+        log_fields:
+          flow: {}
+    outputs:
+      - extract_from: normalize_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.flow))

@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vector-agent-tls
+  namespace: vector
+spec:
+  issuerRef:
+    name: vault-kubernetes-issuer
+    kind: ClusterIssuer
+  secretName: vector-agent-tls-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  commonName: vector-agent.vector.svc
+  dnsNames:
+    - vector-agent.vector.svc
+  usages:
+    - server auth
+    - client auth

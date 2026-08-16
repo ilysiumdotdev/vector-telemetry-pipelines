@@ -1,7 +1,0 @@
-type: remap
-inputs:
-  - kubernetes_audit_logs
-source: |
-  .@source = "kubernetes_audit"
-  .@dataset = "kubernetes.audit"
-  .@namespace = "default"

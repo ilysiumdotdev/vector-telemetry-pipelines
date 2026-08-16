@@ -1,0 +1,16 @@
+tests:
+  - name: test_route_elastic_data_stream_kubernetes_container_adds_data_stream_fields
+    inputs:
+      - insert_at: route_elastic_data_stream_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            pod_namespace: "test-system"
+    outputs:
+      - extract_from: route_elastic_data_stream_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "kubernetes.container")
+              assert_eq!(.data_stream.namespace, "test-system")

@@ -1,0 +1,141 @@
+# Vector Helm Values
+# See Vector helm repository for more:
+# https://github.com/vectordotdev/helm-charts/
+
+# Each role is created with the following workloads:
+# Agent = DaemonSet
+# Aggregator = StatefulSet
+# Stateless-Aggregator = Deployment
+role: "Stateless-Aggregator"
+
+# rollWorkload -- Add a checksum of the generated ConfigMap to workload annotations.
+rollWorkload: false
+
+# replicas -- Specify the number of Pods to create. Valid for the "Aggregator" and "Stateless-Aggregator" roles.
+replicas: 1
+
+# autoscaling:
+#   enabled: false
+#   minReplicas: 3
+#   maxReplicas: 10
+
+rbac:
+  create: false
+
+serviceAccount:
+  # serviceAccount.create -- If true, create a ServiceAccount for Vector.
+  create: true
+  # serviceAccount.annotations -- Annotations to add to Vector's ServiceAccount.
+  annotations: {}
+  # serviceAccount.name -- The name of the ServiceAccount to use. If not set and serviceAccount.create is true, a name
+  # is generated using the fullname template.
+  name: vector-aggregator
+  # serviceAccount.automountToken -- Automount API credentials for Vector's ServiceAccount.
+  automountToken: true
+
+# podAnnotations -- Set annotations on Vector Pods.
+podAnnotations: {}
+
+# podLabels -- Set labels on Vector Pods.
+podLabels:
+  vector.dev/exclude: "true"
+
+# args -- Override Vector's default arguments.
+args:
+  - --watch-config
+  - --config-dir
+  - "/etc/vector/"
+
+# env -- Set environment variables for Vector containers.
+env:
+  - name: ELASTIC_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: vector-elastic-credentials
+        key: username
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: vector-elastic-credentials
+        key: password
+  - name: KUBERNETES_CLUSTER_TYPE
+    value: ${CLUSTER_TYPE}
+  - name: KUBERNETES_CLUSTER_NAME
+    value: ${CLUSTER_NAME}
+
+# resources -- Set Vector resource requests and limits.
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Configuration for Vector's Service.
+service:
+  # service.enabled -- If true, create and provide a Service resource for Vector.
+  enabled: true
+  # service.type -- Set the type for Vector's Service.
+  type: "ClusterIP"
+  # service.ports -- Manually set the Service ports, overriding automated generation of Service ports.
+  ports:
+    - name: syslog
+      port: 514
+      protocol: UDP
+      targetPort: 514
+    - name: vector-grpc
+      port: 8585
+      protocol: TCP
+      targetPort: 8585
+
+# existingConfigMaps -- List of existing ConfigMaps for Vector's configuration instead of creating a new one. Requires
+# dataDir to be set. Additionally, containerPorts, service.ports, and serviceHeadless.ports should be specified based on
+# your supplied configuration. If set, this parameter takes precedence over customConfig and the chart's default configs.
+existingConfigMaps:
+  - vector-base
+
+# dataDir -- Specify the path for Vector's data, only used when existingConfigMaps are used.
+dataDir: /vector-data-dir
+
+# extraVolumes -- Additional Volumes to use with Vector Pods.
+extraVolumes:
+  - name: vector-aggregator-sources
+    configMap:
+      name: vector-aggregator-sources
+  - name: vector-aggregator-transforms
+    configMap:
+      name: vector-aggregator-transforms
+  - name: vector-aggregator-sinks
+    configMap:
+      name: vector-aggregator-sinks
+  - name: vector-aggregator-tls
+    secret:
+      secretName: vector-aggregator-tls-secret
+  - name: ilysium-root-ca
+    configMap:
+      name: ilysium-root-ca
+  - name: elastic-ca
+    configMap:
+      name: elastic-ca
+
+# extraVolumeMounts -- Additional Volume to mount into Vector Containers.
+extraVolumeMounts:
+  - name: vector-aggregator-sources
+    mountPath: /etc/vector/sources
+    readOnly: true
+  - name: vector-aggregator-transforms
+    mountPath: /etc/vector/transforms
+    readOnly: true
+  - name: vector-aggregator-sinks
+    mountPath: /etc/vector/sinks
+    readOnly: true
+  - name: elastic-ca
+    mountPath: /etc/ssl/elastic
+    readOnly: true
+  - name: ilysium-root-ca
+    mountPath: /etc/ssl/ilysium
+    readOnly: true
+  - name: vector-aggregator-tls
+    mountPath: /etc/ssl/vector
+    readOnly: true
