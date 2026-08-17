@@ -2,21 +2,40 @@ type: remap
 inputs:
   - parse_json_kubernetes_audit_logs
 source: |
-  del(.kind)
+  .kubernetes.audit = .
+  del(.kubernetes.audit.kind)
 
-  .event.id = .auditID
-  .event.action = join!(compact([.objectRef.resource, .objectRef.subresource, .verb]), ".")
-  .event.outcome = if .annotations."authorization.k8s.io/decision" == "allow" { "success" } else { "failure" }
+  .event.id = .kubernetes.audit.auditID
+  .event.action = join!(compact([.kubernetes.audit.objectRef.resource, .kubernetes.audit.objectRef.subresource, .kubernetes.audit.verb]), ".")
+  .event.outcome = if .kubernetes.audit.annotations."authorization.k8s.io/decision" == "allow" { "success" } else { "failure" }
   .event.dataset = "kubernetes.audit"
 
-  .user_agent.original = .userAgent
-  .user.name = .user.username
-  .source.ip = .sourceIPs[0]
+  .user_agent.original = .kubernetes.audit.userAgent
+  .user.name = .kubernetes.audit.user.username
+  .user.roles = .kubernetes.audit.user.groups
+  .source.ip = .kubernetes.audit.sourceIPs[0]
 
   .orchestrator.type = "$${KUBERNETES_CLUSTER_TYPE}"
   .orchestrator.cluster.name = "$${KUBERNETES_CLUSTER_NAME}"
-  .orchestrator.namespace = .objectRef.namespace
-  .orchestrator.resource.type = .objectRef.resource
-  .orchestrator.resource.name = .objectRef.name
+  .orchestrator.namespace = .kubernetes.audit.objectRef.namespace
+  .orchestrator.resource.type = .kubernetes.audit.objectRef.resource
+  .orchestrator.resource.name = .kubernetes.audit.objectRef.name
 
-  .kubernetes.audit = .
+  del(.annotations)
+  del(.auditID)
+  del(.authenticationMetadata)
+  del(.impersonatedUser)
+  del(.level)
+  del(.objectRef)
+  del(.requestReceivedTimestamp)
+  del(.requestURI)
+  del(.responseStatus)
+  del(.sourceIPs)
+  del(.stage)
+  del(.stageTimestamp)
+  del(.user.extra)
+  del(.user.groups)
+  del(.user.uid)
+  del(.user.username)
+  del(.userAgent)
+  del(.verb)

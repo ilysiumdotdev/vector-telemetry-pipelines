@@ -39,6 +39,20 @@ tests:
             source: |
               assert_eq!(.user.name, "system:serviceaccount:test:test")
 
+  - name: test_normalize_kubernetes_audit_logs_maps_user_roles
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          user:
+            groups: ["system:serviceaccounts", "system:authenticated"]
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.user.roles, ["system:serviceaccounts", "system:authenticated"])
+
   - name: test_normalize_kubernetes_audit_logs_maps_user_agent
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
@@ -123,7 +137,7 @@ tests:
             source: |
               assert_eq!(.event.outcome, "failure")
 
-  - name: test_normalize_kubernetes_audit_logs_relocates_object_ref
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_object_ref
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
         type: log
@@ -145,7 +159,7 @@ tests:
               assert_eq!(.kubernetes.audit.objectRef.apiGroup, "test.kubernetes.io")
               assert_eq!(.kubernetes.audit.objectRef.apiVersion, "v1")
 
-  - name: test_normalize_kubernetes_audit_logs_relocates_user_identity
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_user_identity
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
         type: log
@@ -163,7 +177,7 @@ tests:
               assert_eq!(.kubernetes.audit.user.uid, "ffffffff-ffff-aaaa-aaaa-hhhhhhhhhhhh")
               assert_eq!(.kubernetes.audit.user.groups, ["system:serviceaccounts", "system:authenticated"])
 
-  - name: test_normalize_kubernetes_audit_logs_relocates_stage_and_verb
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_stage_and_verb
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
         type: log
@@ -180,7 +194,7 @@ tests:
               assert_eq!(.kubernetes.audit.verb, "patch")
               assert_eq!(.kubernetes.audit.requestURI, "/apis/test.kubernetes.io/v1/namespaces/test-system/testObjects")
 
-  - name: test_normalize_kubernetes_audit_logs_relocates_response_status
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_response_status
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
         type: log
@@ -193,3 +207,47 @@ tests:
           - type: vrl
             source: |
               assert_eq!(.kubernetes.audit.responseStatus.code, 200)
+
+  - name: test_normalize_kubernetes_audit_logs_drops_raw_fields
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          auditID: "test-id"
+          objectRef:
+            resource: "secrets"
+            namespace: "test-system"
+          verb: "get"
+          userAgent: "test/v0.0.0"
+          sourceIPs: ["1.1.1.1"]
+          user:
+            username: "test-user"
+            groups: ["system:authenticated"]
+          stage: "ResponseComplete"
+          responseStatus:
+            code: 200
+          annotations:
+            authorization.k8s.io/decision: "allow"
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.annotations))
+              assert!(!exists(.auditID))
+              assert!(!exists(.authenticationMetadata))
+              assert!(!exists(.impersonatedUser))
+              assert!(!exists(.level))
+              assert!(!exists(.objectRef))
+              assert!(!exists(.requestReceivedTimestamp))
+              assert!(!exists(.requestURI))
+              assert!(!exists(.responseStatus))
+              assert!(!exists(.sourceIPs))
+              assert!(!exists(.stage))
+              assert!(!exists(.stageTimestamp))
+              assert!(!exists(.user.extra))
+              assert!(!exists(.user.groups))
+              assert!(!exists(.user.uid))
+              assert!(!exists(.user.username))
+              assert!(!exists(.userAgent))
+              assert!(!exists(.verb))
