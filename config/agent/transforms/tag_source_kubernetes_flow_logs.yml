@@ -2,4 +2,4 @@ type: remap
 inputs:
   - kubernetes_flow_logs
 source: |
-  .@vector.source = "kubernetes.flow"
+  .@vector.stream = "kubernetes.flow"

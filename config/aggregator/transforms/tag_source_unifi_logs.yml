@@ -2,4 +2,4 @@ type: remap
 inputs:
   - unifi_logs
 source: |
-  .@vector.source = "unifi"
+  .@vector.stream = "unifi"
