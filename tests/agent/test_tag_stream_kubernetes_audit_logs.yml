@@ -1,0 +1,13 @@
+tests:
+  - name: test_tag_stream_kubernetes_audit_logs_populates_stream_field
+    inputs:
+      - insert_at: tag_stream_kubernetes_audit_logs
+        type: log
+        log_fields:
+          message: "{}"
+    outputs:
+      - extract_from: tag_stream_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.@vector.stream, "logs.kubernetes.audit")

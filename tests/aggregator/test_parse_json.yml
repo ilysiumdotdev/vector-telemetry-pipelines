@@ -1,0 +1,44 @@
+tests:
+  - name: test_parse_json_parses_valid_json
+    inputs:
+      - insert_at: parse_json
+        type: log
+        log_fields:
+          .@vector.stream: "logs.test.stream"
+          _raw: |
+            {
+              "level": "info",
+              "message": "container started",
+              "app": "frontend"
+            }
+    outputs:
+      - extract_from: parse_json
+        conditions:
+          # Verify parsed fields are merged into root
+          - type: vrl
+            source: |
+              assert_eq!(.level, "info")
+              assert_eq!(.message, "container started")
+              assert_eq!(.app, "frontend")
+
+              assert_eq!(.@vector.stream, "logs.test.stream")
+
+              assert!(!exists(.@vector.parse_error))
+
+  - name: test_parse_json_sets_error_field_on_invalid_json
+    inputs:
+      - insert_at: parse_json
+        type: log
+        log_fields:
+          .@vector.stream: "logs.test.stream"
+          _raw: invalid_json_payload
+    outputs:
+      - extract_from: parse_json
+        conditions:
+          - type: vrl
+            source: |
+              assert!(exists(.@vector.parse_error))
+
+              assert_eq!(._raw, "invalid_json_payload")
+              assert_eq!(.@vector.stream, "logs.test.stream")
+              assert!(!exists(.level))

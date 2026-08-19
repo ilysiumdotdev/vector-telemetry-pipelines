@@ -1,0 +1,26 @@
+tests:
+  - name: test_tag_elastic_data_stream_kubernetes_container_logs_maps_correct_data_stream_fields
+    inputs:
+      - insert_at: tag_elastic_data_stream_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            namespace: "kube-system"
+      - insert_at: tag_elastic_data_stream_kubernetes_container_logs
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: tag_elastic_data_stream_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "kubernetes.container")
+              assert_eq!(.data_stream.namespace, "kube-system")
+      - extract_from: tag_elastic_data_stream_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "kubernetes.container")
+              assert_eq!(.data_stream.namespace, "default")

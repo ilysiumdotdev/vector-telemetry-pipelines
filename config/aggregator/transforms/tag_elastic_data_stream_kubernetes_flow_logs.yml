@@ -1,0 +1,7 @@
+type: remap
+inputs:
+  - normalize_kubernetes_flow_logs
+source: |
+  .data_stream.type = "logs"
+  .data_stream.dataset = "kubernetes.flow"
+  .data_stream.namespace = "default"

@@ -1,0 +1,84 @@
+tests:
+  - name: test_parse_unifi_parses_valid_syslog
+    inputs:
+      - insert_at: parse_unifi
+        type: log
+        log_fields:
+          _raw: "<134>Aug 18 14:00:00 USW-Pro-24 switch: port 1 link down"
+    outputs:
+      - extract_from: parse_unifi
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.hostname, "USW-Pro-24")
+              assert_eq!(.appname, "switch")
+              assert_eq!(.message, "port 1 link down")
+              assert!(!exists(.@vector.parse_error))
+
+  - name: test_parse_unifi_sets_error_field_on_invalid_syslog
+    inputs:
+      - insert_at: parse_unifi
+        type: log
+        log_fields:
+          _raw: "invalid syslog payload"
+    outputs:
+      - extract_from: parse_unifi
+        conditions:
+          - type: vrl
+            source: |
+              assert!(exists(.@vector.parse_error))
+              assert!(!exists(.hostname))
+              assert!(!exists(.appname))
+
+  - name: test_parse_unifi_parses_valid_cef
+    inputs:
+      - insert_at: parse_unifi
+        type: log
+        log_fields:
+          _raw: "<134>Aug 18 14:00:00 UDM CEF:0|Ubiquiti|UDM|1.0|100|Threat Detected|5|src=192.168.1.50 dst=10.0.0.1"
+    outputs:
+      - extract_from: parse_unifi
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.deviceVendor, "Ubiquiti")
+              assert_eq!(.deviceProduct, "UDM")
+              assert_eq!(.src, "192.168.1.50")
+              assert_eq!(.dst, "10.0.0.1")
+
+              assert!(!exists(.@vector.parse_error))
+
+  - name: test_parse_unifi_sets_error_field_on_invalid_cef
+    inputs:
+      - insert_at: parse_unifi
+        type: log
+        log_fields:
+          _raw: "<134>Aug 18 14:00:00 UDM CEF: invalid_cef_header_format"
+    outputs:
+      - extract_from: parse_unifi
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.appname, "CEF")
+              assert_eq!(.hostname, "UDM")
+
+              assert!(exists(.@vector.parse_error))
+              assert!(!exists(.deviceVendor))
+
+  - name: test_parse_unifi_skips_parse_cef_for_non_cef_payload
+    inputs:
+      - insert_at: parse_unifi
+        type: log
+        log_fields:
+          _raw: "<134>Aug 18 14:00:00 USW-Pro-24 hostapd: 0|Ubiquiti|UDM|1.0|100|Threat Detected|5|src=192.168.1.50"
+    outputs:
+      - extract_from: parse_unifi
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.appname, "hostapd")
+              assert_eq!(.hostname, "USW-Pro-24")
+
+              assert!(!exists(.deviceVendor))
+              assert!(!exists(.src))
+              assert!(!exists(.@vector.parse_error))

@@ -1,0 +1,13 @@
+type: remap
+inputs:
+  - normalize_kubernetes_container_logs
+source: |
+  .data_stream.type = "logs"
+  .data_stream.dataset = "kubernetes.container"
+
+  namespace = .kubernetes.namespace
+  if namespace == null {
+    namespace = "default"
+  }
+
+  .data_stream.namespace = namespace

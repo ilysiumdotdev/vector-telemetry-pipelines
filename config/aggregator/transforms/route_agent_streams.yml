@@ -1,0 +1,13 @@
+type: route
+inputs:
+  - vector_agents
+route:
+  kubernetes_audit_logs:
+    type: vrl
+    source: .@vector.stream == "logs.kubernetes.audit"
+  kubernetes_container_logs:
+    type: vrl
+    source: .@vector.stream == "logs.kubernetes.container"
+  kubernetes_flow_logs:
+    type: vrl
+    source: .@vector.stream == "logs.kubernetes.flow"

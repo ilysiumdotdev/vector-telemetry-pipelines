@@ -15,4 +15,6 @@
 data_dir: /vector-data-dir
 
 log_schema:
-  host_key: .@vector.host
+  host_key: .host.name
+  message_key: ._raw
+  timestamp_key: .@vector.ingest_timestamp

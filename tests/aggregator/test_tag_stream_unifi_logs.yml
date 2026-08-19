@@ -1,0 +1,13 @@
+tests:
+  - name: test_tag_stream_unifi_logs_populates_stream_field
+    inputs:
+      - insert_at: tag_stream_unifi_logs
+        type: log
+        log_fields:
+          message: "{}"
+    outputs:
+      - extract_from: tag_stream_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.@vector.stream, "logs.unifi")

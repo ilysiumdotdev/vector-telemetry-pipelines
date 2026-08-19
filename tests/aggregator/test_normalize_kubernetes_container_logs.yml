@@ -1,0 +1,127 @@
+tests:
+  - name: test_normalize_kubernetes_container_logs_maps_kubernetes_container_fields
+    inputs:
+      - insert_at: normalize_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            container_id: "containerd://56980d549bc858dfb4943fa50f670d679675c8f5637e2827df5c30f872611417"
+            container_name: "test-container"
+            container_image: "docker.io/test/test-container:1.0.0"
+            container_image_id: "docker.io/test/test-container@sha256:1b4c7f62e971ab259a4b8798e48e2adaad4af747f45990f474ea5feefa03531d"
+    outputs:
+      - extract_from: normalize_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.container.id, "containerd://56980d549bc858dfb4943fa50f670d679675c8f5637e2827df5c30f872611417")
+              assert_eq!(.kubernetes.container.name, "test-container")
+              assert_eq!(.kubernetes.container.image, "docker.io/test/test-container:1.0.0")
+              assert_eq!(.kubernetes.container.image_id, "docker.io/test/test-container@sha256:1b4c7f62e971ab259a4b8798e48e2adaad4af747f45990f474ea5feefa03531d")
+
+  - name: test_normalize_kubernetes_container_logs_maps_kubernetes_pod_fields
+    inputs:
+      - insert_at: normalize_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            pod_annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/port: "9300"
+            pod_labels:
+              app.kubernetes.io/name: "test"
+              app.kubernetes.io/instance: "test"
+            pod_namespace: "test-system"
+            pod_node_name: "test-k8s-01"
+            pod_name: "test-pod"
+            pod_uid: "00000000-0000-0000-0000-000000000000"
+            pod_ip: "1.1.1.1"
+    outputs:
+      - extract_from: normalize_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.annotations."prometheus.io/scrape", "true")
+              assert_eq!(.kubernetes.annotations."prometheus.io/port", "9300")
+              assert_eq!(.kubernetes.labels."app.kubernetes.io/name", "test")
+              assert_eq!(.kubernetes.labels."app.kubernetes.io/instance", "test")
+              assert_eq!(.kubernetes.namespace, "test-system")
+              assert_eq!(.kubernetes.pod.name, "test-pod")
+              assert_eq!(.kubernetes.pod.uid, "00000000-0000-0000-0000-000000000000")
+              assert_eq!(.kubernetes.pod.ip, "1.1.1.1")
+
+  - name: test_normalize_kubernetes_container_logs_maps_kubernetes_node_fields
+    inputs:
+      - insert_at: normalize_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            node_labels:
+              kubernetes.io/os: "linux"
+              kubernetes.io/arch: "amd64"
+            pod_node_name: "test-k8s-01"
+    outputs:
+      - extract_from: normalize_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.node.labels."kubernetes.io/os", "linux")
+              assert_eq!(.kubernetes.node.labels."kubernetes.io/arch", "amd64")
+              assert_eq!(.kubernetes.node.name, "test-k8s-01")
+
+  - name: test_normalize_kubernetes_container_logs_keeps_kubernetes_namespace_labels
+    inputs:
+      - insert_at: normalize_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            namespace_labels:
+              kubernetes.io/metadata.name: "test-system"
+              pod-security.kubernetes.io/enforce: "baseline"
+    outputs:
+      - extract_from: normalize_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.namespace_labels."kubernetes.io/metadata.name", "test-system")
+              assert_eq!(.kubernetes.namespace_labels."pod-security.kubernetes.io/enforce", "baseline")
+
+  - name: test_normalize_kubernetes_container_logs_drops_raw_fields
+    inputs:
+      - insert_at: normalize_kubernetes_container_logs
+        type: log
+        log_fields:
+          kubernetes:
+            container_id: "test"
+            container_image: "test"
+            container_image_id: "test"
+            container_name: "test"
+            node_labels: {}
+            pod_annotations: {}
+            pod_ip: "8.8.8.8"
+            pod_ips: "8.8.8.8"
+            pod_labels: {}
+            pod_name: "test"
+            pod_namespace: "test"
+            pod_node_name: "test"
+            pod_owner: "test"
+            pod_uid: "test"
+    outputs:
+      - extract_from: normalize_kubernetes_container_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert!(!exists(.kubernetes.container_id))
+              assert!(!exists(.kubernetes.container_image))
+              assert!(!exists(.kubernetes.container_image_id))
+              assert!(!exists(.kubernetes.container_name))
+              assert!(!exists(.kubernetes.node_labels))
+              assert!(!exists(.kubernetes.pod_annotations))
+              assert!(!exists(.kubernetes.pod_ip))
+              assert!(!exists(.kubernetes.pod_ips))
+              assert!(!exists(.kubernetes.pod_labels))
+              assert!(!exists(.kubernetes.pod_name))
+              assert!(!exists(.kubernetes.pod_namespace))
+              assert!(!exists(.kubernetes.pod_node_name))
+              assert!(!exists(.kubernetes.pod_owner))
+              assert!(!exists(.kubernetes.pod_uid))
