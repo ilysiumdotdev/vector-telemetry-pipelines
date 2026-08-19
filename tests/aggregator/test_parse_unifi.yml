@@ -1,5 +1,5 @@
 tests:
-  - name: test_parse_unifi_valid_syslog
+  - name: test_parse_unifi_parses_valid_syslog
     inputs:
       - insert_at: parse_unifi
         type: log
@@ -15,7 +15,7 @@ tests:
               assert_eq!(.message, "port 1 link down")
               assert!(!exists(.@vector.parse_error))
 
-  - name: test_parse_unifi_invalid_syslog
+  - name: test_parse_unifi_sets_error_field_on_invalid_syslog
     inputs:
       - insert_at: parse_unifi
         type: log
@@ -30,7 +30,7 @@ tests:
               assert!(!exists(.hostname))
               assert!(!exists(.appname))
 
-  - name: test_parse_unifi_valid_cef_parse_success
+  - name: test_parse_unifi_parses_valid_cef
     inputs:
       - insert_at: parse_unifi
         type: log
@@ -48,7 +48,7 @@ tests:
 
               assert!(!exists(.@vector.parse_error))
 
-  - name: test_parse_unifi_cef_parse_failure
+  - name: test_parse_unifi_sets_error_field_on_invalid_cef
     inputs:
       - insert_at: parse_unifi
         type: log

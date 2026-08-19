@@ -1,5 +1,5 @@
 tests:
-  - name: test_parse_json_valid_json
+  - name: test_parse_json_parses_valid_json
     inputs:
       - insert_at: parse_json
         type: log
@@ -25,7 +25,7 @@ tests:
 
               assert!(!exists(.@vector.parse_error))
 
-  - name: test_parse_json_invalid_json
+  - name: test_parse_json_sets_error_field_on_invalid_json
     inputs:
       - insert_at: parse_json
         type: log
@@ -42,4 +42,3 @@ tests:
               assert_eq!(._raw, "invalid_json_payload")
               assert_eq!(.@vector.stream, "logs.test.stream")
               assert!(!exists(.level))
-
