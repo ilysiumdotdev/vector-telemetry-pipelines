@@ -6,7 +6,7 @@ inputs:
 source: |
   parsed, err = parse_json(._raw)
   if err == null {
-    . = merge(., parsed)
+    . = merge!(., parsed)
   } else {
     .@vector.parse_error = err
   }

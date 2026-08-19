@@ -14,6 +14,6 @@ source: |
     if err == null {
       . = merge(., parsed)
     } else {
-      .@vector.parse_error = cef_err
+      .@vector.parse_error = err
     }
   }
