@@ -2,6 +2,8 @@ type: remap
 inputs:
   - route_parsed_streams.kubernetes_audit_logs
 source: |
+  .log.file = .file
+
   .kubernetes.audit.annotations = .annotations
   .kubernetes.audit.auditID = .auditID
   .kubernetes.audit.authenticationMetadata = .authenticationMetadata
