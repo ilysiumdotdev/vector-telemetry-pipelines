@@ -10,7 +10,7 @@ source: |
   }
 
   if .appname == "CEF" {
-    parsed, err = parse_cef("CEF:" + .message)
+    parsed, err = parse_cef(join!(["CEF", .message], separator: ":"))
     if err == null {
       . = merge(., parsed)
     } else {
