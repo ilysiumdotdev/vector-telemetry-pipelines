@@ -1,6 +1,6 @@
 type: remap
 inputs:
-  - parse_json_kubernetes_audit_logs
+  - route_prased_streams.kubernetes_audit_logs
 source: |
   .kubernetes.audit.annotations = .annotations
   .kubernetes.audit.auditID = .auditID
