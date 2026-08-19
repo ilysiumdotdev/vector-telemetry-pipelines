@@ -1,0 +1,42 @@
+type: remap
+inputs:
+  - route_parsed_streams.kubernetes_container_logs
+source: |
+  .log.file = .file
+
+  .kubernetes.container.id = .kubernetes.container_id
+  .kubernetes.container.name = .kubernetes.container_name
+  .kubernetes.container.image = .kubernetes.container_image  
+  .kubernetes.container.image_id = .kubernetes.container_image_id
+
+  .kubernetes.annotations = .kubernetes.pod_annotations
+  .kubernetes.labels = .kubernetes.pod_labels
+  .kubernetes.namespace = .kubernetes.pod_namespace
+  .kubernetes.node.labels = .kubernetes.node_labels
+  .kubernetes.node.name = .kubernetes.pod_node_name
+  .kubernetes.pod.name = .kubernetes.pod_name
+  .kubernetes.pod.uid = .kubernetes.pod_uid
+  .kubernetes.pod.ip = .kubernetes.pod_ip
+
+  .orchestrator.type = $${KUBERNETES_CLUSTER_TYPE}
+  .orchestrator.cluster.name = $${KUBERNETES_CLUSTER_NAME}
+
+  if !exists(.timestamp) {
+    .timestamp = .@vector.ingest_time
+  }
+
+  del(.file)
+  del(.kubernetes_container_id)
+  del(.kubernetes.container_image)
+  del(.kubernetes.container_image_id)
+  del(.kubernetes.container_name)
+  del(.kubernetes.node_labels)
+  del(.kubernetes.pod_annotations)
+  del(.kubernetes.pod_ip)
+  del(.kubernetes.pod_ips)
+  del(.kubernetes.pod_labels)
+  del(.kubernetes.pod_name)
+  del(.kubernetes.pod_namespace)
+  del(.kubernetes.pod_node_name)
+  del(.kubernetes.pod_owner)
+  del(.kubernetes.pod_uid)
