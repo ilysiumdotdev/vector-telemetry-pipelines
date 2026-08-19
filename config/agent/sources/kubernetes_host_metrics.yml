@@ -8,7 +8,7 @@ collectors:
   - network
   - process
 namespace: host
-scrape_interval_secs: 15
+scrape_interval_secs: 30
 filesystem:
   devices:
     excludes: ["binfmt_misc"]
