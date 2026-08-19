@@ -21,9 +21,9 @@ configMapGenerator:
 
   - name: vector-agent-transforms
     files:
-      - ../../config/agent/transforms/tag_source_kubernetes_audit_logs.yml
-      - ../../config/agent/transforms/tag_source_kubernetes_container_logs.yml
-      - ../../config/agent/transforms/tag_source_kubernetes_flow_logs.yml
+      - ../../config/agent/transforms/tag_stream_kubernetes_audit_logs.yml
+      - ../../config/agent/transforms/tag_stream_kubernetes_container_logs.yml
+      - ../../config/agent/transforms/tag_stream_kubernetes_flow_logs.yml
 
   - name: vector-agent-sinks
     files:
@@ -37,17 +37,16 @@ configMapGenerator:
   - name: vector-aggregator-transforms
     files:
       - ../../config/aggregator/transforms/normalize_kubernetes_audit_logs.yml
+      - ../../config/aggregator/transforms/normalize_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/normalize_kubernetes_flow_logs.yml
-      - ../../config/aggregator/transforms/parse_cef_unifi_logs.yml
-      - ../../config/aggregator/transforms/parse_json_kubernetes_audit_logs.yml
-      - ../../config/aggregator/transforms/parse_json_kubernetes_container_logs.yml
-      - ../../config/aggregator/transforms/parse_json_kubernetes_flow_logs.yml
-      - ../../config/aggregator/transforms/parse_syslog_unifi_logs.yml
-      - ../../config/aggregator/transforms/route_by_source.yml
-      - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_audit_logs.yml
-      - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_container_logs.yml
-      - ../../config/aggregator/transforms/route_elastic_data_stream_kubernetes_flow_logs.yml
-      - ../../config/aggregator/transforms/route_elastic_data_stream_unifi_logs.yml
+      - ../../config/aggregator/transforms/parse_json.yml
+      - ../../config/aggregator/transforms/parse_unifi.yml
+      - ../../config/aggregator/transforms/route_agent_streams.yml
+      - ../../config/aggregator/transforms/route_parsed_streams.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_audit_logs.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_container_logs.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_flow_logs.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_unifi_logs.yml
       - ../../config/aggregator/transforms/tag_source_unifi_logs.yml
 
   - name: vector-aggregator-sinks

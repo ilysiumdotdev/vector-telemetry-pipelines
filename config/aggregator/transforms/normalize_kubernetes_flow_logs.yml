@@ -1,6 +1,6 @@
 type: remap
 inputs:
-  - route_parsed_streams_kubernetes_flow_logs
+  - route_parsed_streams.kubernetes_flow_logs
 source: |
   if !exists(.flow) {
     null

@@ -1,0 +1,7 @@
+type: remap
+inputs:
+  - route_parsed_streams.unifi_logs
+source: |
+  .data_stream.type = "logs"
+  .data_stream.dataset = "unifi"
+  .data_stream.namespace = "default"

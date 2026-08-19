@@ -1,0 +1,14 @@
+tests:
+  - name: test_tag_elastic_data_stream_kubernetes_flow_logs_maps_correct_data_stream_fields
+    inputs:
+      - insert_at: tag_elastic_data_stream_kubernetes_flow_logs
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: tag_elastic_data_stream_kubernetes_flow_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "kubernetes.flow")
+              assert_eq!(.data_stream.namespace, "default")

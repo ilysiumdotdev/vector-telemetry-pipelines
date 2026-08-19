@@ -1,0 +1,14 @@
+tests:
+  - name: test_tag_elastic_data_stream_unifi_logs_maps_correct_data_stream_fields
+    inputs:
+      - insert_at: tag_elastic_data_stream_unifi_logs
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: tag_elastic_data_stream_unifi_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "logs")
+              assert_eq!(.data_stream.dataset, "unifi")
+              assert_eq!(.data_stream.namespace, "default")
