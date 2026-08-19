@@ -47,7 +47,7 @@ configMapGenerator:
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_flow_logs.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_unifi_logs.yml
-      - ../../config/aggregator/transforms/tag_source_unifi_logs.yml
+      - ../../config/aggregator/transforms/tag_stream_unifi_logs.yml
 
   - name: vector-aggregator-sinks
     files:
