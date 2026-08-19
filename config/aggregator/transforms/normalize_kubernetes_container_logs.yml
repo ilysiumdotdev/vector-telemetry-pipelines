@@ -18,15 +18,15 @@ source: |
   .kubernetes.pod.uid = .kubernetes.pod_uid
   .kubernetes.pod.ip = .kubernetes.pod_ip
 
-  .orchestrator.type = $${KUBERNETES_CLUSTER_TYPE}
-  .orchestrator.cluster.name = $${KUBERNETES_CLUSTER_NAME}
+  .orchestrator.type = "$${KUBERNETES_CLUSTER_TYPE}"
+  .orchestrator.cluster.name = "$${KUBERNETES_CLUSTER_NAME}"
 
   if !exists(.timestamp) {
     .timestamp = .@vector.ingest_time
   }
 
   del(.file)
-  del(.kubernetes_container_id)
+  del(.kubernetes.container_id)
   del(.kubernetes.container_image)
   del(.kubernetes.container_image_id)
   del(.kubernetes.container_name)
