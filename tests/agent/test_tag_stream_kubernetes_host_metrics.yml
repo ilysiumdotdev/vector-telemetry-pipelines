@@ -1,0 +1,13 @@
+tests:
+  - name: test_tag_stream_kubernetes_host_metrics_populates_stream_field
+    inputs:
+      - insert_at: tag_stream_kubernetes_host_metrics
+        type: log
+        log_fields:
+          message: "{}"
+    outputs:
+      - extract_from: tag_stream_kubernetes_host_metrics
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.@vector.stream, "metrics.kubernetes.host")

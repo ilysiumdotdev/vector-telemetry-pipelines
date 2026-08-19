@@ -15,7 +15,7 @@ tests:
               assert_eq!(.message, "port 1 link down")
               assert!(!exists(.@vector.parse_error))
 
-  - name: test_parse_unifi_sets_error_field_on_invalid_syslog
+  - name: test_parse_unifi_sets_passes_message_on_invalid_syslog
     inputs:
       - insert_at: parse_unifi
         type: log
@@ -26,9 +26,7 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert!(exists(.@vector.parse_error))
-              assert!(!exists(.hostname))
-              assert!(!exists(.appname))
+              assert_eq!(.message, "invalid syslog payload")
 
   - name: test_parse_unifi_parses_valid_cef
     inputs:

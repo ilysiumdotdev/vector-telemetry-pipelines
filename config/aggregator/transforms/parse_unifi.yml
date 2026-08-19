@@ -6,7 +6,7 @@ source: |
   if err == null {
     . = merge(., parsed)
   } else {
-    .@vector.parse_error = err
+    .message = ._raw
   }
 
   if .appname == "CEF" {

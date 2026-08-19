@@ -1,0 +1,7 @@
+type: remap
+inputs:
+  - route_parsed_streams.kubernetes_host_metrics
+source: |
+  .data_stream.type = "metrics"
+  .data_stream.dataset = "kubernetes.host"
+  .data_stream.namespace = "default"

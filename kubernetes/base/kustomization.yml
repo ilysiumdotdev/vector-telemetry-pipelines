@@ -18,12 +18,14 @@ configMapGenerator:
       - ../../config/agent/sources/kubernetes_audit_logs.yml
       - ../../config/agent/sources/kubernetes_container_logs.yml
       - ../../config/agent/sources/kubernetes_flow_logs.yml
+      - ../../config/agent/sources/kubernetes_host_metrics.yml
 
   - name: vector-agent-transforms
     files:
       - ../../config/agent/transforms/tag_stream_kubernetes_audit_logs.yml
       - ../../config/agent/transforms/tag_stream_kubernetes_container_logs.yml
       - ../../config/agent/transforms/tag_stream_kubernetes_flow_logs.yml
+      - ../../config/agent/transforms/tag_stream_kubernetes_host_metrics.yml
 
   - name: vector-agent-sinks
     files:
@@ -46,12 +48,14 @@ configMapGenerator:
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_audit_logs.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_flow_logs.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_host_metrics.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_unifi_logs.yml
       - ../../config/aggregator/transforms/tag_stream_unifi_logs.yml
 
   - name: vector-aggregator-sinks
     files:
       - ../../config/aggregator/sinks/elasticsearch_logs.yml
+      - ../../config/aggregator/sinks/elasticsearch_metrics.yml
 
 generatorOptions:
   disableNameSuffixHash: true

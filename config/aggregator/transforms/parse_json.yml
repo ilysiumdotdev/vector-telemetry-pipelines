@@ -3,10 +3,15 @@ inputs:
   - route_agent_streams.kubernetes_audit_logs
   - route_agent_streams.kubernetes_container_logs
   - route_agent_streams.kubernetes_flow_logs
+  - route_agent_streams.kubernetes_host_metrics
 source: |
   parsed, err = parse_json(._raw)
   if err == null {
     . = merge!(., parsed)
   } else {
-    .@vector.parse_error = err
+    if .@vector.stream == "logs.kubernetes.container" {
+      .message = ._raw
+    } else {
+      .@vector.parse_error = err
+    }
   }
