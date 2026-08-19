@@ -11,3 +11,6 @@ route:
   kubernetes_flow_logs:
     type: vrl
     source: .@vector.stream == "logs.kubernetes.flow"
+  kubernetes_host_metrics:
+    type: vrl
+    source: .@vector.stream == "metrics.kubernetes.host"

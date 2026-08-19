@@ -1,0 +1,14 @@
+tests:
+  - name: test_tag_elastic_data_stream_kubernetes_host_metrics_maps_correct_data_stream_fields
+    inputs:
+      - insert_at: tag_elastic_data_stream_kubernetes_host_metrics
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: tag_elastic_data_stream_kubernetes_host_metrics
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.data_stream.type, "metrics")
+              assert_eq!(.data_stream.dataset, "kubernetes.host")
+              assert_eq!(.data_stream.namespace, "default")

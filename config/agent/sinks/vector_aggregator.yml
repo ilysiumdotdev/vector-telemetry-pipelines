@@ -3,6 +3,7 @@ inputs:
   - tag_stream_kubernetes_audit_logs
   - tag_stream_kubernetes_container_logs
   - tag_stream_kubernetes_flow_logs
+  - tag_stream_kubernetes_host_metrics
 address: vector-aggregator.vector.svc:8585
 tls:
   enabled: true

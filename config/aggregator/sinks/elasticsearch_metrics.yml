@@ -1,0 +1,17 @@
+type: elasticsearch
+api_version: "v8"
+inputs:
+  - tag_elastic_data_stream_kubernetes_host_metrics
+endpoints:
+  - https://elasticsearch-es-http.elastic-stack.svc:9200
+tls:
+  ca_file: /etc/ssl/elastic/ca.crt
+auth:
+  strategy: basic
+  user: "$${ELASTIC_USERNAME}"
+  password: "$${ELASTIC_PASSWORD}"
+mode: data_stream
+data_stream:
+  auto_routing: true
+bulk:
+  action: create

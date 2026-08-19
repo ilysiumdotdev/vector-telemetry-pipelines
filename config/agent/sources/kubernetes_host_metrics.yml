@@ -1,0 +1,14 @@
+type: host_metrics
+collectors:
+  - cpu
+  - memory
+  - disk
+  - filesystem
+  - load
+  - network
+  - process
+namespace: host
+scrape_interval_secs: 15
+filesystem:
+  devices:
+    excludes: ["binfmt_misc"]
