@@ -1,4 +1,88 @@
 tests:
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_object_ref
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          objectRef:
+            resource: "testObjects"
+            namespace: "test-system"
+            name: "test"
+            apiGroup: "test.kubernetes.io"
+            apiVersion: "v1"
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.audit.objectRef.resource, "testObjects")
+              assert_eq!(.kubernetes.audit.objectRef.namespace, "test-system")
+              assert_eq!(.kubernetes.audit.objectRef.name, "test")
+              assert_eq!(.kubernetes.audit.objectRef.apiGroup, "test.kubernetes.io")
+              assert_eq!(.kubernetes.audit.objectRef.apiVersion, "v1")
+
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_user_identity
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          user:
+            username: "system:serviceaccount:test:test"
+            uid: "ffffffff-ffff-aaaa-aaaa-hhhhhhhhhhhh"
+            groups: ["system:serviceaccounts", "system:authenticated"]
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.audit.user.username, "system:serviceaccount:test:test")
+              assert_eq!(.kubernetes.audit.user.uid, "ffffffff-ffff-aaaa-aaaa-hhhhhhhhhhhh")
+              assert_eq!(.kubernetes.audit.user.groups, ["system:serviceaccounts", "system:authenticated"])
+
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_stage_and_verb
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          stage: "ResponseComplete"
+          verb: "patch"
+          requestURI: "/apis/test.kubernetes.io/v1/namespaces/test-system/testObjects"
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.audit.stage, "ResponseComplete")
+              assert_eq!(.kubernetes.audit.verb, "patch")
+              assert_eq!(.kubernetes.audit.requestURI, "/apis/test.kubernetes.io/v1/namespaces/test-system/testObjects")
+
+  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_response_status
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          responseStatus:
+            code: 200
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.kubernetes.audit.responseStatus.code, 200)
+
+  - name: test_normalize_kubernetes_audit_logs_maps_timestamp
+    inputs:
+      - insert_at: normalize_kubernetes_audit_logs
+        type: log
+        log_fields:
+          requestReceivedTimestamp: "2026-01-01T00:00:00.000Z"
+    outputs:
+      - extract_from: normalize_kubernetes_audit_logs
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.timestamp, "2026-01-01T00:00:00.000Z")
+
   - name: test_normalize_kubernetes_audit_logs_maps_event_id
     inputs:
       - insert_at: normalize_kubernetes_audit_logs
@@ -136,77 +220,6 @@ tests:
           - type: vrl
             source: |
               assert_eq!(.event.outcome, "failure")
-
-  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_object_ref
-    inputs:
-      - insert_at: normalize_kubernetes_audit_logs
-        type: log
-        log_fields:
-          objectRef:
-            resource: "testObjects"
-            namespace: "test-system"
-            name: "test"
-            apiGroup: "test.kubernetes.io"
-            apiVersion: "v1"
-    outputs:
-      - extract_from: normalize_kubernetes_audit_logs
-        conditions:
-          - type: vrl
-            source: |
-              assert_eq!(.kubernetes.audit.objectRef.resource, "testObjects")
-              assert_eq!(.kubernetes.audit.objectRef.namespace, "test-system")
-              assert_eq!(.kubernetes.audit.objectRef.name, "test")
-              assert_eq!(.kubernetes.audit.objectRef.apiGroup, "test.kubernetes.io")
-              assert_eq!(.kubernetes.audit.objectRef.apiVersion, "v1")
-
-  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_user_identity
-    inputs:
-      - insert_at: normalize_kubernetes_audit_logs
-        type: log
-        log_fields:
-          user:
-            username: "system:serviceaccount:test:test"
-            uid: "ffffffff-ffff-aaaa-aaaa-hhhhhhhhhhhh"
-            groups: ["system:serviceaccounts", "system:authenticated"]
-    outputs:
-      - extract_from: normalize_kubernetes_audit_logs
-        conditions:
-          - type: vrl
-            source: |
-              assert_eq!(.kubernetes.audit.user.username, "system:serviceaccount:test:test")
-              assert_eq!(.kubernetes.audit.user.uid, "ffffffff-ffff-aaaa-aaaa-hhhhhhhhhhhh")
-              assert_eq!(.kubernetes.audit.user.groups, ["system:serviceaccounts", "system:authenticated"])
-
-  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_stage_and_verb
-    inputs:
-      - insert_at: normalize_kubernetes_audit_logs
-        type: log
-        log_fields:
-          stage: "ResponseComplete"
-          verb: "patch"
-          requestURI: "/apis/test.kubernetes.io/v1/namespaces/test-system/testObjects"
-    outputs:
-      - extract_from: normalize_kubernetes_audit_logs
-        conditions:
-          - type: vrl
-            source: |
-              assert_eq!(.kubernetes.audit.stage, "ResponseComplete")
-              assert_eq!(.kubernetes.audit.verb, "patch")
-              assert_eq!(.kubernetes.audit.requestURI, "/apis/test.kubernetes.io/v1/namespaces/test-system/testObjects")
-
-  - name: test_normalize_kubernetes_audit_logs_kubernetes_audit_contains_response_status
-    inputs:
-      - insert_at: normalize_kubernetes_audit_logs
-        type: log
-        log_fields:
-          responseStatus:
-            code: 200
-    outputs:
-      - extract_from: normalize_kubernetes_audit_logs
-        conditions:
-          - type: vrl
-            source: |
-              assert_eq!(.kubernetes.audit.responseStatus.code, 200)
 
   - name: test_normalize_kubernetes_audit_logs_drops_raw_fields
     inputs:

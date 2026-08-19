@@ -1,0 +1,19 @@
+type: remap
+inputs:
+  - tag_stream_unifi_logs
+source: |
+  parsed, err = parse_syslog(._raw)
+  if err == null {
+    . = merge(., parsed)
+  } else {
+    .@vector.parse_error = err
+  }
+
+  if .appname == "CEF" {
+    parsed, err = parse_cef("CEF:" + .message)
+    if err == null {
+      . = merge(., parsed)
+    } else {
+      .@vector.parse_error = cef_err
+    }
+  }

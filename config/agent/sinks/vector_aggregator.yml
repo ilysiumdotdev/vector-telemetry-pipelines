@@ -1,8 +1,8 @@
 type: vector
 inputs:
-  - tag_source_kubernetes_audit_logs
-  - tag_source_kubernetes_container_logs
-  - tag_source_kubernetes_flow_logs
+  - tag_stream_kubernetes_audit_logs
+  - tag_stream_kubernetes_container_logs
+  - tag_stream_kubernetes_flow_logs
 address: vector-aggregator.vector.svc:8585
 tls:
   enabled: true
