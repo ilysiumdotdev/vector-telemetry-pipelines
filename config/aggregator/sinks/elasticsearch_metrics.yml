@@ -12,7 +12,7 @@ auth:
   password: "$${ELASTIC_PASSWORD}"
 mode: data_stream
 data_stream:
-  type: '{{ .tags."data_stream.type" }}'
+  type: 'metrics'
   dataset: '{{ .tags."data_stream.dataset" }}'
   namespace: '{{ .tags."data_stream.namespace" }}'
 bulk:
