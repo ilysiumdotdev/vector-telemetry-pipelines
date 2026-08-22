@@ -11,7 +11,7 @@ auth:
   user: "$${ELASTIC_USERNAME}"
   password: "$${ELASTIC_PASSWORD}"
 mode: data_stream
-dangerously_allow_unconfined_templated_resolution: true
+dangerously_allow_unconfined_template_resolution: true
 data_stream:
   type: '{{ .tags."data_stream.type" }}'
   dataset: '{{ .tags."data_stream.dataset" }}'
