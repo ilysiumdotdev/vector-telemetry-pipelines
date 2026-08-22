@@ -2,4 +2,4 @@ type: remap
 inputs:
   - kubernetes_host_metrics
 source: |
-  .@vector.stream = "metrics.kubernetes.host"
+  .tags."@vector.stream" = "metrics.kubernetes.host"

@@ -10,4 +10,4 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert_eq!(.@vector.stream, "metrics.kubernetes.host")
+              assert_eq!(.tags."@vector.stream", "metrics.kubernetes.host")
