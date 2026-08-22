@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: vector
-      version: "0.51.x"
+      version: "0.57.x"
       sourceRef:
         kind: HelmRepository
         name: vector
