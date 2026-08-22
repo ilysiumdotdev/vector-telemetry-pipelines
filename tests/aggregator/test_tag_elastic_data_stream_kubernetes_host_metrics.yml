@@ -9,6 +9,6 @@ tests:
         conditions:
           - type: vrl
             source: |
-              assert_eq!(.data_stream.type, "metrics")
-              assert_eq!(.data_stream.dataset, "kubernetes.host")
-              assert_eq!(.data_stream.namespace, "default")
+              assert_eq!(.tags."data_stream.type", "metrics")
+              assert_eq!(.tags."data_stream.dataset", "kubernetes.host")
+              assert_eq!(.tags."data_stream.namespace", "default")

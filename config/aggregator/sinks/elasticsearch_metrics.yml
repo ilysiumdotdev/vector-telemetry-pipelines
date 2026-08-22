@@ -11,7 +11,10 @@ auth:
   user: "$${ELASTIC_USERNAME}"
   password: "$${ELASTIC_PASSWORD}"
 mode: data_stream
+dangerously_allow_unconfined_template_resolution: true
 data_stream:
-  auto_routing: true
+  type: '{{ .tags."data_stream.type" }}'
+  dataset: '{{ .tags."data_stream.dataset" }}'
+  namespace: '{{ .tags."data_stream.namespace" }}'
 bulk:
   action: create

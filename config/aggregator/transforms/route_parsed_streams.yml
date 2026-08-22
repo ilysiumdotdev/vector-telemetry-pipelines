@@ -14,7 +14,7 @@ route:
     source: .@vector.stream == "logs.kubernetes.flow"
   kubernetes_host_metrics:
     type: vrl
-    source: .@vector.stream == "metrics.kubernetes.host"
+    source: .tags."@vector.stream" == "metrics.kubernetes.host"
   unifi_logs:
     type: vrl
     source: .@vector.stream == "logs.unifi"
