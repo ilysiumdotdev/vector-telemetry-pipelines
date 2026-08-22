@@ -18,3 +18,7 @@ data_stream:
   namespace: '{{ .tags."data_stream.namespace" }}'
 bulk:
   action: create
+batch:
+  max_bytes: 10000000 # ~10MB
+  max_events: 20000
+  timeout_secs: 2

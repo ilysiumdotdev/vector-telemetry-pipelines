@@ -18,3 +18,7 @@ data_stream:
   auto_routing: true
 bulk:
   action: create
+batch:
+  max_bytes: 10000000 # ~10MB
+  max_events: 10000
+  timeout_secs: 5
