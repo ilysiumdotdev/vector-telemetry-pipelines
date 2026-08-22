@@ -12,8 +12,8 @@ auth:
   password: "$${ELASTIC_PASSWORD}"
 mode: data_stream
 data_stream:
-  type: "{{ .tags."data_stream.type" }}"
-  dataset: "{{ .tags."data_stream.dataset" }}"
-  namespace: "{{ .tags."data_stream.namespace" }}"
+  type: '{{ .tags."data_stream.type" }}'
+  dataset: '{{ .tags."data_stream.dataset" }}'
+  namespace: '{{ .tags."data_stream.namespace" }}'
 bulk:
   action: create
