@@ -3,3 +3,5 @@ inputs:
   - kubernetes_host_metrics
 source: |
   .tags."@vector.stream" = "metrics.kubernetes.host"
+  .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
+  .tags.host = "$${VECTOR_SELF_NODE_NAME}"
