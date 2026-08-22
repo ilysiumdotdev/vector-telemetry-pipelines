@@ -48,6 +48,12 @@ args:
 
 # env -- Set environment variables for Vector containers.
 env:
+  - name: VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION
+    value: "true"
+  - name: KUBERNETES_CLUSTER_TYPE
+    value: ${CLUSTER_TYPE}
+  - name: KUBERNETES_CLUSTER_NAME
+    value: ${CLUSTER_NAME}
   - name: ELASTIC_USERNAME
     valueFrom:
       secretKeyRef:
@@ -58,10 +64,7 @@ env:
       secretKeyRef:
         name: vector-elastic-credentials
         key: password
-  - name: KUBERNETES_CLUSTER_TYPE
-    value: ${CLUSTER_TYPE}
-  - name: KUBERNETES_CLUSTER_NAME
-    value: ${CLUSTER_NAME}
+
 
 # resources -- Set Vector resource requests and limits.
 resources:
