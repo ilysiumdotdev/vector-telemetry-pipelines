@@ -19,6 +19,6 @@ data_stream:
 bulk:
   action: create
 batch:
-  max_bytes: 10000000 # ~10MB
+  max_bytes: 10485760 # ~10MB
   max_events: 20000
   timeout_secs: 2
