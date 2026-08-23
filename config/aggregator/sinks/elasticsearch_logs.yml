@@ -18,6 +18,7 @@ data_stream:
   auto_routing: true
 bulk:
   action: create
+compression: gzip
 batch:
   max_bytes: 10485760 # ~10MB
   max_events: 10000
