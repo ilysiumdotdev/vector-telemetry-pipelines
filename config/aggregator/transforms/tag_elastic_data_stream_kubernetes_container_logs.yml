@@ -10,4 +10,4 @@ source: |
     namespace = "default"
   }
 
-  .data_stream.namespace = namespace
+  .data_stream.namespace = replace!(namespace, "-", "_")

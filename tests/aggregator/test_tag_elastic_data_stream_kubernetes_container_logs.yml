@@ -16,7 +16,7 @@ tests:
             source: |
               assert_eq!(.data_stream.type, "logs")
               assert_eq!(.data_stream.dataset, "kubernetes.container")
-              assert_eq!(.data_stream.namespace, "kube-system")
+              assert_eq!(.data_stream.namespace, "kube_system")
       - extract_from: tag_elastic_data_stream_kubernetes_container_logs
         conditions:
           - type: vrl
