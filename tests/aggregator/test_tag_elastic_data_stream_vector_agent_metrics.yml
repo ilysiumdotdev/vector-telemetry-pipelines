@@ -1,0 +1,14 @@
+tests:
+  - name: test_tag_elastic_data_stream_vector_agent_metrics_maps_correct_data_stream_fields
+    inputs:
+      - insert_at: tag_elastic_data_stream_vector_agent_metrics
+        type: log
+        log_fields: {}
+    outputs:
+      - extract_from: tag_elastic_data_stream_vector_agent_metrics
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.tags."data_stream.type", "metrics")
+              assert_eq!(.tags."data_stream.dataset", "vector.agent")
+              assert_eq!(.tags."data_stream.namespace", "default")

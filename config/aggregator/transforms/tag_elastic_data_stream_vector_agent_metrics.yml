@@ -1,0 +1,7 @@
+type: remap
+inputs:
+  - route_parsed_streams.vector_agent_metrics
+source: |
+  .tags."data_stream.type" = "metrics"
+  .tags."data_stream.dataset" = "vector.agent"
+  .tags."data_stream.namespace" = "default"

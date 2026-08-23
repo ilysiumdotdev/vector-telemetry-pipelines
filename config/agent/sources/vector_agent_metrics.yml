@@ -1,0 +1,2 @@
+type: internal_metrics
+scrape_interval_secs: 1

@@ -4,6 +4,7 @@ inputs:
   - tag_stream_kubernetes_container_logs
   - tag_stream_kubernetes_flow_logs
   - tag_stream_kubernetes_host_metrics
+  - tag_stream_vector_agent_metrics
 address: vector-aggregator.vector.svc:8585
 tls:
   enabled: true
@@ -14,3 +15,14 @@ tls:
   verify_hostname: true
 healthcheck:
   enabled: true
+keepalive:
+  interval_secs: 60
+  timeout_secs: 20
+batch:
+  max_bytes: 2097152 # ~2MB
+  max_events: 1000
+  timeout_secs: 1
+buffer:
+  type: disk
+  max_size: 1073741824 # ~1GB
+  when_full: block
