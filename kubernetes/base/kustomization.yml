@@ -18,7 +18,7 @@ configMapGenerator:
       - ../../config/agent/sources/kubernetes_audit_logs.yml
       - ../../config/agent/sources/kubernetes_container_logs.yml
       - ../../config/agent/sources/kubernetes_flow_logs.yml
-      - ../../config/agent/sources/kubernetes_host_metrics.yml'
+      - ../../config/agent/sources/kubernetes_host_metrics.yml
       - ../../config/agent/sources/vector_agent_metrics.yml
 
   - name: vector-agent-transforms
