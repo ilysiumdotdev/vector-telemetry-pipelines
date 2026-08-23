@@ -18,7 +18,8 @@ configMapGenerator:
       - ../../config/agent/sources/kubernetes_audit_logs.yml
       - ../../config/agent/sources/kubernetes_container_logs.yml
       - ../../config/agent/sources/kubernetes_flow_logs.yml
-      - ../../config/agent/sources/kubernetes_host_metrics.yml
+      - ../../config/agent/sources/kubernetes_host_metrics.yml'
+      - ../../config/agent/sources/vector_agent_metrics.yml
 
   - name: vector-agent-transforms
     files:
@@ -26,6 +27,7 @@ configMapGenerator:
       - ../../config/agent/transforms/tag_stream_kubernetes_container_logs.yml
       - ../../config/agent/transforms/tag_stream_kubernetes_flow_logs.yml
       - ../../config/agent/transforms/tag_stream_kubernetes_host_metrics.yml
+      - ../../config/agent/transforms/tag_stream_vector_agent_metrics.yml
 
   - name: vector-agent-sinks
     files:
@@ -35,6 +37,7 @@ configMapGenerator:
     files:
       - ../../config/aggregator/sources/unifi_logs.yml
       - ../../config/aggregator/sources/vector_agents.yml
+      - ../../config/aggregator/sources/vector_aggregator_metrics.yml
 
   - name: vector-aggregator-transforms
     files:
@@ -50,7 +53,10 @@ configMapGenerator:
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_flow_logs.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_kubernetes_host_metrics.yml
       - ../../config/aggregator/transforms/tag_elastic_data_stream_unifi_logs.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_vector_agent_metrics.yml
+      - ../../config/aggregator/transforms/tag_elastic_data_stream_vector_aggregator_metrics.yml
       - ../../config/aggregator/transforms/tag_stream_unifi_logs.yml
+      - ../../config/aggregator/transforms/tag_stream_vector_aggregator_metrics.yml
 
   - name: vector-aggregator-sinks
     files:
