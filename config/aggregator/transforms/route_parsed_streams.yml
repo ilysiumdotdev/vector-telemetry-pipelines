@@ -18,3 +18,9 @@ route:
   unifi_logs:
     type: vrl
     source: .@vector.stream == "logs.unifi"
+  vector_agent_metrics:
+    type: vrl
+    source: .tags."@vector.stream" == "metrics.vector.agent"
+  vector_aggregator_metrics:
+    type: vrl
+    source: .tags."@vector.stream" == "metrics.vector.aggregator"

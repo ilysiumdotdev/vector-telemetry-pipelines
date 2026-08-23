@@ -1,0 +1,14 @@
+tests:
+  - name: test_tag_stream_vector_agent_metrics_populates_stream_field
+    inputs:
+      - insert_at: tag_stream_vector_agent_metrics
+        type: log
+        log_fields:
+          message: "{}"
+    outputs:
+      - extract_from: tag_stream_vector_agent_metrics
+        conditions:
+          - type: vrl
+            source: |
+              assert_eq!(.tags."@vector.stream", "metrics.vector.agent")
+              assert_eq!(.tags.role, "agent")

@@ -12,7 +12,7 @@ role: "Stateless-Aggregator"
 rollWorkload: false
 
 # replicas -- Specify the number of Pods to create. Valid for the "Aggregator" and "Stateless-Aggregator" roles.
-replicas: 1
+replicas: 3
 
 # autoscaling:
 #   enabled: false
@@ -48,6 +48,8 @@ args:
 
 # env -- Set environment variables for Vector containers.
 env:
+  - name: VECTOR_LOG
+    value: "info"
   - name: VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION
     value: "true"
   - name: KUBERNETES_CLUSTER_TYPE
@@ -64,7 +66,6 @@ env:
       secretKeyRef:
         name: vector-elastic-credentials
         key: password
-
 
 # resources -- Set Vector resource requests and limits.
 resources:

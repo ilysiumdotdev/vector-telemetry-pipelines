@@ -14,3 +14,6 @@ route:
   kubernetes_host_metrics:
     type: vrl
     source: .tags."@vector.stream" == "metrics.kubernetes.host"
+  vector_agent_metrics:
+    type: vrl
+    source: .tags."@vector.stream" == "metrics.vector.agent"
