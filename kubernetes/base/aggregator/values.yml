@@ -12,7 +12,7 @@ role: "Stateless-Aggregator"
 rollWorkload: false
 
 # replicas -- Specify the number of Pods to create. Valid for the "Aggregator" and "Stateless-Aggregator" roles.
-replicas: 1
+replicas: 3
 
 # autoscaling:
 #   enabled: false
@@ -66,7 +66,6 @@ env:
       secretKeyRef:
         name: vector-elastic-credentials
         key: password
-
 
 # resources -- Set Vector resource requests and limits.
 resources:
