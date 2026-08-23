@@ -1,10 +1,11 @@
 type: host_metrics
 collectors:
   - cpu
-  - memory
   - disk
   - filesystem
+  - host
   - load
+  - memory
   - network
   - process
 namespace: host
