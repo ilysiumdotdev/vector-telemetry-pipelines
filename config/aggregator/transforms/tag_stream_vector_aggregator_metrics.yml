@@ -4,5 +4,4 @@ inputs:
 source: |
   .tags."@vector.stream" = "metrics.vector.aggregator"
   .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
-  .tags.host = "$${VECTOR_SELF_NODE_NAME}"
   .tags.role = "aggregator"
