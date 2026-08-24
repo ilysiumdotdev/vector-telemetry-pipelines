@@ -6,6 +6,7 @@ inputs:
   - tag_stream_kubernetes_host_metrics
   - tag_stream_vector_agent_metrics
 address: vector-aggregator.vector.svc:8585
+compression: true
 tls:
   enabled: true
   ca_file: /etc/ssl/ilysium/ca.crt
@@ -18,9 +19,11 @@ healthcheck:
 keepalive:
   interval_secs: 60
   timeout_secs: 20
+request:
+  timeout_secs: 60
 batch:
-  max_bytes: 2097152 # ~2MB
-  max_events: 1000
+  max_bytes: 524288 # ~512KB
+  max_events: 500
   timeout_secs: 1
 buffer:
   type: disk
