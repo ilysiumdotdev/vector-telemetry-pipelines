@@ -3,7 +3,7 @@ api_version: "v8"
 inputs:
   - tag_elastic_data_stream_kubernetes_host_metrics
   # - tag_elastic_data_stream_vector_agent_metrics
-  # - tag_elastic_data_stream_vector_aggregator_metrics
+  - tag_elastic_data_stream_vector_aggregator_metrics
 endpoints:
   - https://elasticsearch-es-http.elastic-stack.svc:9200
 tls:
