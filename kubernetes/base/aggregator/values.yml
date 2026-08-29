@@ -45,6 +45,8 @@ args:
   - --watch-config
   - --config-dir
   - "/etc/vector/"
+  - --config-dir
+  - "/etc/ssl/vector"
 
 # env -- Set environment variables for Vector containers.
 env:
