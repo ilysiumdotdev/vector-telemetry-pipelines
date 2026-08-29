@@ -14,6 +14,10 @@
 
 data_dir: /vector-data-dir
 
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
 log_schema:
   host_key: .host.name
   message_key: ._raw
