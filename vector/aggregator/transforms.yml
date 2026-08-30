@@ -26,9 +26,6 @@ transforms:
       kubernetes_container_logs:
         type: vrl
         source: .@vector.stream == "logs.kubernetes.container"
-      kubernetes_flow_logs:
-        type: vrl
-        source: .@vector.stream == "logs.kubernetes.flow"
       kubernetes_host_metrics:
         type: vrl
         source: .tags."@vector.stream" == "metrics.kubernetes.host"
@@ -36,15 +33,23 @@ transforms:
         type: vrl
         source: .tags."@vector.stream" == "metrics.vector.agent"
 
+  filter_vector_aggregator_metrics:
+    type: filter
+    inputs:
+      - tag_stream_vector_aggregator_metrics
+    condition:
+      type: vrl
+      source: |
+        !exists(.aggregated_histogram) && !exists(.aggregated_summary)
+
   parse_json:
     type: remap
     inputs:
       - route_agent_streams.kubernetes_audit_logs
       - route_agent_streams.kubernetes_container_logs
-      - route_agent_streams.kubernetes_flow_logs
       - route_agent_streams.kubernetes_host_metrics
       - route_agent_streams.vector_agent_metrics
-      - tag_stream_vector_aggregator_metrics
+      - filter_vector_aggregator_metrics
     source: |
       parsed, err = parse_json(._raw)
       if err == null {
@@ -90,9 +95,6 @@ transforms:
       kubernetes_container_logs:
         type: vrl
         source: .@vector.stream == "logs.kubernetes.container"
-      kubernetes_flow_logs:
-        type: vrl
-        source: .@vector.stream == "logs.kubernetes.flow"
       kubernetes_host_metrics:
         type: vrl
         source: .tags."@vector.stream" == "metrics.kubernetes.host"
