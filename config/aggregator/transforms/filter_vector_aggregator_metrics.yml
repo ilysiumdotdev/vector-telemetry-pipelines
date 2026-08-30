@@ -1,0 +1,7 @@
+type: filter
+inputs:
+  - route_parsed_streams.vector_aggregator_metrics
+condition:
+  type: vrl
+  source: |
+    !exists(.aggregated_histogram)

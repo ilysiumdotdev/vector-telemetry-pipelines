@@ -41,6 +41,7 @@ configMapGenerator:
 
   - name: vector-aggregator-transforms
     files:
+      - ../../config/aggregator/transforms/filter_vector_aggregator_metrics.yml
       - ../../config/aggregator/transforms/normalize_kubernetes_audit_logs.yml
       - ../../config/aggregator/transforms/normalize_kubernetes_container_logs.yml
       - ../../config/aggregator/transforms/normalize_kubernetes_flow_logs.yml

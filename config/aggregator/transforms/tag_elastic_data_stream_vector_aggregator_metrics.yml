@@ -1,6 +1,6 @@
 type: remap
 inputs:
-  - route_parsed_streams.vector_aggregator_metrics
+  - filter_vector_aggregator_metrics
 source: |
   .tags."data_stream.type" = "metrics"
   .tags."data_stream.dataset" = "vector.aggregator"
