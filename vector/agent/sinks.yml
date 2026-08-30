@@ -6,8 +6,11 @@ sinks:
       - tag_stream_kubernetes_container_logs
       - tag_stream_kubernetes_host_metrics
       - tag_stream_vector_agent_metrics
-    address: vector-aggregator.vector.svc:8585
-    compression: true
+    routing:
+      endpoints:
+        - vector-aggregator.vector.svc:8585
+      strategy: load_balance
+    compression: gzip
     tls:
       enabled: true
       ca_file: /etc/ssl/ilysium/ca.crt
