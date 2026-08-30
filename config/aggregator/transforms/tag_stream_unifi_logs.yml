@@ -1,5 +1,0 @@
-type: remap
-inputs:
-  - unifi_logs
-source: |
-  .@vector.stream = "logs.unifi"

@@ -9,7 +9,7 @@
 role: "Agent"
 
 # rollWorkload -- Add a checksum of the generated ConfigMap to workload annotations.
-rollWorkload: false
+rollWorkload: true
 
 rbac:
   create: false
@@ -67,6 +67,7 @@ service:
 # your supplied configuration. If set, this parameter takes precedence over customConfig and the chart's default configs.
 existingConfigMaps:
   - vector-base
+  - vector-agent-config
 
 # dataDir -- Specify the path for Vector's data, only used when existingConfigMaps are used.
 dataDir: /vector-data-dir
@@ -76,15 +77,6 @@ logLevel: info
 
 # extraVolumes -- Additional Volumes to use with Vector Pods.
 extraVolumes:
-  - name: sources
-    configMap:
-      name: vector-agent-sources
-  - name: transforms
-    configMap:
-      name: vector-agent-transforms
-  - name: sinks
-    configMap:
-      name: vector-agent-sinks
   - name: root-ca
     configMap:
       name: ilysium-root-ca
@@ -98,15 +90,6 @@ extraVolumes:
 
 # extraVolumeMounts -- Additional Volume to mount into Vector Containers.
 extraVolumeMounts:
-  - name: sources
-    mountPath: /etc/vector/sources
-    readOnly: true
-  - name: transforms
-    mountPath: /etc/vector/transforms
-    readOnly: true
-  - name: sinks
-    mountPath: /etc/vector/sinks
-    readOnly: true
   - name: root-ca
     mountPath: /etc/ssl/ilysium
     readOnly: true

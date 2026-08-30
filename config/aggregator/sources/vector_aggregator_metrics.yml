@@ -1,4 +1,0 @@
-type: internal_metrics
-scrape_interval_secs: 1
-tags:
-  host_key: host

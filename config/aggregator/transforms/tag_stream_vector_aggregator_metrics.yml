@@ -1,7 +1,0 @@
-type: remap
-inputs:
-  - vector_aggregator_metrics
-source: |
-  .tags."@vector.stream" = "metrics.vector.aggregator"
-  .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
-  .tags.role = "aggregator"

@@ -1,3 +1,0 @@
-type: kubernetes_logs
-auto_partial_merge: true
-self_node_name: "$${VECTOR_SELF_NODE_NAME}"

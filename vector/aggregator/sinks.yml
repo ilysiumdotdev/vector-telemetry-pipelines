@@ -1,0 +1,55 @@
+sinks:
+  elasticsearch_logs:
+    type: elasticsearch
+    api_version: "v8"
+    inputs:
+      - tag_elastic_data_stream_kubernetes_audit_logs
+      - tag_elastic_data_stream_kubernetes_container_logs
+      - tag_elastic_data_stream_unifi_logs
+    endpoints:
+      - https://elasticsearch-es-http.elastic-stack.svc:9200
+    tls:
+      ca_file: /etc/ssl/elastic/ca.crt
+    auth:
+      strategy: basic
+      user: "$${ELASTIC_USERNAME}"
+      password: "$${ELASTIC_PASSWORD}"
+    mode: data_stream
+    data_stream:
+      auto_routing: true
+    bulk:
+      action: create
+    compression: gzip
+    batch:
+      max_bytes: 10485760 # ~10MB
+      max_events: 10000
+      timeout_secs: 5
+
+  elasticsearch_metrics:
+    type: elasticsearch
+    api_version: "v8"
+    inputs:
+      - tag_elastic_data_stream_kubernetes_host_metrics
+      # - tag_elastic_data_stream_vector_agent_metrics
+      - tag_elastic_data_stream_vector_aggregator_metrics
+    endpoints:
+      - https://elasticsearch-es-http.elastic-stack.svc:9200
+    tls:
+      ca_file: /etc/ssl/elastic/ca.crt
+    auth:
+      strategy: basic
+      user: "$${ELASTIC_USERNAME}"
+      password: "$${ELASTIC_PASSWORD}"
+    mode: data_stream
+    dangerously_allow_unconfined_template_resolution: true
+    data_stream:
+      type: '{{ .tags."data_stream.type" }}'
+      dataset: '{{ .tags."data_stream.dataset" }}'
+      namespace: '{{ .tags."data_stream.namespace" }}'
+    bulk:
+      action: create
+    compression: gzip
+    batch:
+      max_bytes: 10485760 # ~10MB
+      max_events: 20000
+      timeout_secs: 1

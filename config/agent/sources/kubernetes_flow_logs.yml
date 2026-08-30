@@ -1,7 +1,0 @@
-type: file
-include:
-  - /var/run/cilium/hubble/*.log
-read_from: beginning
-max_line_bytes: 102400
-max_read_bytes: 2048
-ignore_older_secs: 600

@@ -1,8 +1,0 @@
-type: remap
-inputs:
-  - vector_agent_metrics
-source: |
-  .tags."@vector.stream" = "metrics.vector.agent"
-  .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
-  .tags.host = "$${VECTOR_SELF_NODE_NAME}"
-  .tags.role = "agent"
