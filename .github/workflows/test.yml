@@ -28,11 +28,11 @@ jobs:
       - name: Validate Configuration
         run: |
           vector validate \
-            --config-dir config/${{ matrix.target.id}}/ \
+            --config-dir vector/${{ matrix.target.id}}/ \
             --no-environment
 
       - name: Run Unit Tests
         run: |
           vector test \
-            --config-dir config/${{ matrix.target.id }} \
+            --config-dir vector/${{ matrix.target.id }} \
             --config-dir tests/${{ matrix.target.id }}

@@ -1,0 +1,33 @@
+transforms:
+  tag_stream_kubernetes_audit_logs:
+    type: remap
+    inputs:
+      - kubernetes_audit_logs
+    source: |
+      .@vector.stream = "logs.kubernetes.audit"
+
+  tag_stream_kubernetes_container_logs:
+    type: remap
+    inputs:
+      - kubernetes_container_logs
+    source: |
+      .@vector.stream = "logs.kubernetes.container"
+
+  tag_stream_kubernetes_host_metrics:
+    type: remap
+    inputs:
+      - kubernetes_host_metrics
+    source: |
+      .tags."@vector.stream" = "metrics.kubernetes.host"
+      .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
+      .tags.host = "$${VECTOR_SELF_NODE_NAME}"
+
+  tag_stream_vector_agent_metrics:
+    type: remap
+    inputs:
+      - vector_agent_metrics
+    source: |
+      .tags."@vector.stream" = "metrics.vector.agent"
+      .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
+      .tags.host = "$${VECTOR_SELF_NODE_NAME}"
+      .tags.role = "agent"

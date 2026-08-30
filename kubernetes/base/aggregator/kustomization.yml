@@ -8,6 +8,12 @@ configMapGenerator:
   - name: vector-aggregator-values
     files:
       - values.yml
+  
+  - name: vector-aggregator-config
+    files:
+      - ../../vector/aggregator/sources.yml
+      - ../../vector/aggregator/transforms.yml
+      - ../../vector/aggregator/sinks.yml
 
 generatorOptions:
   disableNameSuffixHash: true

@@ -1,0 +1,35 @@
+sources:
+  kubernetes_audit_logs:
+    type: file
+    include:
+      - /var/log/audit/kube/*.log
+    read_from: beginning
+    max_line_bytes: 102400
+    max_read_bytes: 2048
+    ignore_older_secs: 600
+
+  kubernetes_container_logs:
+    type: kubernetes_logs
+    auto_partial_merge: true
+    self_node_name: "$${VECTOR_SELF_NODE_NAME}"
+
+  kubernetes_host_metrics:
+    type: host_metrics
+    collectors:
+      - cpu
+      - disk
+      - filesystem
+      - host
+      - load
+      - memory
+      - network
+      - process
+    namespace: host
+    scrape_interval_secs: 30
+    filesystem:
+      devices:
+        excludes: ["binfmt_misc"]
+
+  vector_agent_metrics:
+    type: internal_metrics
+    scrape_interval_secs: 1

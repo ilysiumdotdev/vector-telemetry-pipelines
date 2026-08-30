@@ -1,0 +1,275 @@
+transforms:
+  tag_stream_unifi_logs:
+    type: remap
+    inputs:
+      - unifi_logs
+    source: |
+      .@vector.stream = "logs.unifi"
+
+  tag_stream_vector_aggregator_metrics:
+    type: remap
+    inputs:
+      - vector_aggregator_metrics
+    source: |
+      .tags."@vector.stream" = "metrics.vector.aggregator"
+      .tags."kubernetes.cluster" = "$${KUBERNETES_CLUSTER_NAME}"
+      .tags.role = "aggregator"
+
+  route_agent_streams:
+    type: route
+    inputs:
+      - vector_agents
+    route:
+      kubernetes_audit_logs:
+        type: vrl
+        source: .@vector.stream == "logs.kubernetes.audit"
+      kubernetes_container_logs:
+        type: vrl
+        source: .@vector.stream == "logs.kubernetes.container"
+      kubernetes_host_metrics:
+        type: vrl
+        source: .tags."@vector.stream" == "metrics.kubernetes.host"
+      vector_agent_metrics:
+        type: vrl
+        source: .tags."@vector.stream" == "metrics.vector.agent"
+
+  filter_vector_aggregator_metrics:
+    type: filter
+    inputs:
+      - tag_stream_vector_aggregator_metrics
+    condition:
+      type: vrl
+      source: |
+        !exists(.aggregated_histogram) && !exists(.aggregated_summary)
+
+  parse_json:
+    type: remap
+    inputs:
+      - route_agent_streams.kubernetes_audit_logs
+      - route_agent_streams.kubernetes_container_logs
+      - route_agent_streams.kubernetes_host_metrics
+      - route_agent_streams.vector_agent_metrics
+      - filter_vector_aggregator_metrics
+    source: |
+      parsed, err = parse_json(._raw)
+      if err == null {
+        . = merge!(., parsed)
+      } else {
+        if .@vector.stream == "logs.kubernetes.container" {
+          .message = ._raw
+        } else {
+          .@vector.parse_error = err
+        }
+      }
+
+  parse_unifi:
+    type: remap
+    inputs:
+      - tag_stream_unifi_logs
+    source: |
+      parsed, err = parse_syslog(._raw)
+      if err == null {
+        . = merge(., parsed)
+      } else {
+        .message = ._raw
+      }
+
+      if .appname == "CEF" {
+        parsed, err = parse_cef(join!(["CEF", .message], separator: ":"))
+        if err == null {
+          . = merge(., parsed)
+        } else {
+          .@vector.parse_error = err
+        }
+      }
+
+  route_parsed_streams:
+    type: route
+    inputs:
+      - parse_json
+      - parse_unifi
+    route:
+      kubernetes_audit_logs:
+        type: vrl
+        source: .@vector.stream == "logs.kubernetes.audit"
+      kubernetes_container_logs:
+        type: vrl
+        source: .@vector.stream == "logs.kubernetes.container"
+      kubernetes_host_metrics:
+        type: vrl
+        source: .tags."@vector.stream" == "metrics.kubernetes.host"
+      unifi_logs:
+        type: vrl
+        source: .@vector.stream == "logs.unifi"
+      vector_agent_metrics:
+        type: vrl
+        source: .tags."@vector.stream" == "metrics.vector.agent"
+      vector_aggregator_metrics:
+        type: vrl
+        source: .tags."@vector.stream" == "metrics.vector.aggregator"
+
+  normalize_kubernetes_audit_logs:
+    type: remap
+    inputs:
+      - route_parsed_streams.kubernetes_audit_logs
+    source: |
+      .log.file = .file
+
+      .kubernetes.audit.annotations = .annotations
+      .kubernetes.audit.auditID = .auditID
+      .kubernetes.audit.authenticationMetadata = .authenticationMetadata
+      .kubernetes.audit.impersonatedUser = .impersonatedUser
+      .kubernetes.audit.level = .level
+      .kubernetes.audit.objectRef = .objectRef
+      .kubernetes.audit.requestReceivedTimestamp = .requestReceivedTimestamp
+      .kubernetes.audit.requestURI = .requestURI
+      .kubernetes.audit.responseStatus = .responseStatus
+      .kubernetes.audit.sourceIPs = .sourceIPs
+      .kubernetes.audit.stage = .stage
+      .kubernetes.audit.stageTimestamp = .stageTimestamp
+      .kubernetes.audit.user = .user
+      .kubernetes.audit.userAgent = .userAgent
+      .kubernetes.audit.verb = .verb
+
+      .timestamp = .requestReceivedTimestamp
+
+      .event.id = .auditID
+      .event.action = join!(compact([.objectRef.resource, .objectRef.subresource, .verb]), ".")
+      .event.outcome = if .annotations."authorization.k8s.io/decision" == "allow" { "success" } else { "failure" }
+      .event.dataset = "kubernetes.audit"
+
+      .user_agent.original = .userAgent
+      .user.name = .user.username
+      .user.roles = .user.groups
+      .source.ip = .sourceIPs[0]
+
+      .orchestrator.type = "$${KUBERNETES_CLUSTER_TYPE}"
+      .orchestrator.cluster.name = "$${KUBERNETES_CLUSTER_NAME}"
+      .orchestrator.namespace = .objectRef.namespace
+      .orchestrator.resource.type = .objectRef.resource
+      .orchestrator.resource.name = .objectRef.name
+
+      del(.annotations)
+      del(.auditID)
+      del(.authenticationMetadata)
+      del(.impersonatedUser)
+      del(.kind)
+      del(.level)
+      del(.objectRef)
+      del(.requestReceivedTimestamp)
+      del(.requestURI)
+      del(.responseStatus)
+      del(.sourceIPs)
+      del(.stage)
+      del(.stageTimestamp)
+      del(.user.extra)
+      del(.user.groups)
+      del(.user.uid)
+      del(.user.username)
+      del(.userAgent)
+      del(.verb)
+
+  normalize_kubernetes_container_logs:
+    type: remap
+    inputs:
+      - route_parsed_streams.kubernetes_container_logs
+    source: |
+      .log.file = .file
+
+      .kubernetes.container.id = .kubernetes.container_id
+      .kubernetes.container.name = .kubernetes.container_name
+      .kubernetes.container.image = .kubernetes.container_image  
+      .kubernetes.container.image_id = .kubernetes.container_image_id
+
+      .kubernetes.annotations = .kubernetes.pod_annotations
+      .kubernetes.labels = .kubernetes.pod_labels
+      .kubernetes.namespace = .kubernetes.pod_namespace
+      .kubernetes.pod.name = .kubernetes.pod_name
+      .kubernetes.pod.uid = .kubernetes.pod_uid
+      .kubernetes.pod.ip = .kubernetes.pod_ip
+
+      .kubernetes.node.labels = .kubernetes.node_labels
+      .kubernetes.node.name = .kubernetes.pod_node_name
+
+      .orchestrator.type = "$${KUBERNETES_CLUSTER_TYPE}"
+      .orchestrator.cluster.name = "$${KUBERNETES_CLUSTER_NAME}"
+
+      if !exists(.timestamp) {
+        .timestamp = .@vector.ingest_time
+      }
+
+      del(.file)
+      del(.kubernetes.container_id)
+      del(.kubernetes.container_image)
+      del(.kubernetes.container_image_id)
+      del(.kubernetes.container_name)
+      del(.kubernetes.node_labels)
+      del(.kubernetes.pod_annotations)
+      del(.kubernetes.pod_ip)
+      del(.kubernetes.pod_ips)
+      del(.kubernetes.pod_labels)
+      del(.kubernetes.pod_name)
+      del(.kubernetes.pod_namespace)
+      del(.kubernetes.pod_node_name)
+      del(.kubernetes.pod_owner)
+      del(.kubernetes.pod_uid)
+
+  tag_elastic_data_stream_kubernetes_audit_logs:
+    type: remap
+    inputs:
+      - normalize_kubernetes_audit_logs
+    source: |
+      .data_stream.type = "logs"
+      .data_stream.dataset = "kubernetes.audit"
+      .data_stream.namespace = "default"
+
+  tag_elastic_data_stream_kubernetes_container_logs:
+    type: remap
+    inputs:
+      - normalize_kubernetes_container_logs
+    source: |
+      .data_stream.type = "logs"
+      .data_stream.dataset = "kubernetes.container"
+
+      namespace = .kubernetes.namespace
+      if namespace == null {
+        namespace = "default"
+      }
+
+      .data_stream.namespace = replace!(namespace, "-", "_")
+
+  tag_elastic_data_stream_kubernetes_host_metrics:
+    type: remap
+    inputs:
+      - route_parsed_streams.kubernetes_host_metrics
+    source: |
+      .tags."data_stream.type" = "metrics"
+      .tags."data_stream.dataset" = "kubernetes.host"
+      .tags."data_stream.namespace" = "default"
+
+  tag_elastic_data_stream_unifi_logs:
+    type: remap
+    inputs:
+      - route_parsed_streams.unifi_logs
+    source: |
+      .data_stream.type = "logs"
+      .data_stream.dataset = "unifi"
+      .data_stream.namespace = "default"
+
+  tag_elastic_data_stream_vector_agent_metrics:
+    type: remap
+    inputs:
+      - route_parsed_streams.vector_agent_metrics
+    source: |
+      .tags."data_stream.type" = "metrics"
+      .tags."data_stream.dataset" = "vector.agent"
+      .tags."data_stream.namespace" = "default"
+
+  tag_elastic_data_stream_vector_aggregator_metrics:
+    type: remap
+    inputs:
+      - route_parsed_streams.vector_aggregator_metrics
+    source: |
+      .tags."data_stream.type" = "metrics"
+      .tags."data_stream.dataset" = "vector.aggregator"
+      .tags."data_stream.namespace" = "default"

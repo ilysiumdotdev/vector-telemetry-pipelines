@@ -9,5 +9,11 @@ configMapGenerator:
     files:
       - values.yml
 
+  - name: vector-agent-config
+    files:
+      - ../../vector/agent/sources.yml
+      - ../../vector/agent/transforms.yml
+      - ../../vector/agent/sinks.yml
+
 generatorOptions:
   disableNameSuffixHash: true
