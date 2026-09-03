@@ -11,7 +11,7 @@ resources:
 configMapGenerator:
   - name: vector-base
     files:
-      - ../../config/vector.yml
+      - ../../../vector/vector.yml
 
 generatorOptions:
   disableNameSuffixHash: true
